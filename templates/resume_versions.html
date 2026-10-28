@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Resume versions{% endblock %}
+{% block content %}
+<section class="container feature-page narrow-page">
+  <div class="results-topline"><div><p class="eyebrow">Resume history</p><h1>{{ draft.title }}</h1><p class="muted">Private version snapshots saved under your account.</p></div><a class="button button-outline" href="{{ url_for('main.resume_builder', draft_id=draft.draft_id) }}">Back to editor</a></div>
+  <div class="panel version-list">
+    {% for version in versions %}
+    <article class="version-row"><div><b>Version {{ version.version }}</b><p>{{ version.created_at.strftime('%b %d, %Y at %H:%M UTC') }}</p></div><details><summary>Preview this saved version</summary><pre>{{ version.data|tojson(indent=2) }}</pre></details></article>
+    {% else %}<p class="empty-note">No saved versions yet.</p>{% endfor %}
+  </div>
+</section>
+{% endblock %}

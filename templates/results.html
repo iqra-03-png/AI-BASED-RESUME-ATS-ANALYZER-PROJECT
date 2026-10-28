@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Analysis results{% endblock %}
+{% block content %}
+<section class="container results-page">
+  <div class="results-topline">
+    <div><p class="eyebrow">Analysis results</p><h1>{{ report.job_description.job_title or "Resume match report" }}</h1><p class="muted">{{ report.resume.file_name }} · {{ report.created_at.strftime('%B %d, %Y') }}</p></div>
+    <a class="button button-outline" href="{{ url_for('main.download_report', report_id=report.report_id) }}">Download PDF <span aria-hidden="true">↓</span></a>
+  </div>
+  <div class="results-grid">
+    <section class="panel score-panel">
+      <div class="score-main">
+        <div class="score-ring" style="--score: {{ report.ats_score }}%" role="img" aria-label="ATS estimate {{ report.ats_score }} out of 100"><div><strong>{{ report.ats_score }}</strong><span>/100</span></div></div>
+        <div><p class="eyebrow">ATS compatibility estimate</p><h2>{{ "Strong alignment" if report.ats_score >= 75 else "Some alignment" if report.ats_score >= 50 else "Room to strengthen" }}</h2><p class="muted">A rule-based estimate based on this resume and job description.</p></div>
+      </div>
+      <div class="score-breakdown">
+        <div class="breakdown-header"><h2>Score breakdown</h2><span>Raw score × weight</span></div>
+        {% for component in report_data.score_breakdown %}
+        <div class="breakdown-row">
+          <div class="breakdown-label"><b>{{ component.name }}</b><span>{{ component.raw_score }}% × {{ component.weight }}% <strong>{{ component.weighted_contribution }} pts</strong></span></div>
+          <div class="progress-track" role="progressbar" aria-label="{{ component.name }} raw score" aria-valuenow="{{ component.raw_score }}" aria-valuemin="0" aria-valuemax="100"><span style="width: {{ component.raw_score }}%"></span></div>
+        </div>
+        {% endfor %}
+      </div>
+      <p class="formula-note">{{ report.score_formula }}</p>
+    </section>
+    <section class="panel skills-panel">
+      <div class="panel-heading"><div><p class="eyebrow">Skill comparison</p><h2>What the dictionary detected</h2></div></div>
+      <h3 class="tag-heading">Matched skills <span>{{ report_data.matched_skills|length }}</span></h3>
+      <div class="tag-list">{% for skill in report_data.matched_skills %}<span class="skill-tag matched">{{ skill }}</span>{% else %}<p class="empty-note">No matching skills were detected.</p>{% endfor %}</div>
+      <h3 class="tag-heading missing-heading">Not detected <span>{{ report_data.missing_skills|length }}</span></h3>
+      <div class="tag-list">{% for skill in report_data.missing_skills %}<span class="skill-tag missing">{{ skill }}</span>{% else %}<p class="empty-note">No missing listed skills were detected.</p>{% endfor %}</div>
+      <p class="small-note">Dictionary matching is exact/alias-based. A missing tag does not prove you lack that skill; only add it if it is true.</p>
+    </section>
+    <section class="panel keyword-panel">
+      <p class="eyebrow">Text comparison</p><h2>Important job-description terms</h2>
+      <div class="keyword-columns">
+        <div><h3>Found in resume</h3><div class="tag-list">{% for keyword in report_data.matched_keywords %}<span class="keyword-tag">{{ keyword }}</span>{% else %}<p class="empty-note">No important terms were detected in both texts.</p>{% endfor %}</div></div>
+        <div><h3>Not detected</h3><div class="tag-list">{% for keyword in report_data.missing_keywords %}<span class="keyword-tag keyword-missing">{{ keyword }}</span>{% else %}<p class="empty-note">No missing terms from the selected list.</p>{% endfor %}</div></div>
+      </div>
+    </section>
+    <section class="panel checks-panel">
+      <p class="eyebrow">Resume presentation</p><h2>Structure and readability checks</h2>
+      {% for check in report_data.structure_checks %}
+      <div class="check-row"><span class="check-icon {{ 'passed' if check.passed else 'failed' }}">{{ "✓" if check.passed else "–" }}</span>{{ check.label }}</div>
+      {% endfor %}
+      {% for check in report_data.readability_checks %}
+      <div class="check-row"><span class="check-icon {{ 'passed' if check.passed else 'failed' }}">{{ "✓" if check.passed else "–" }}</span>{{ check.label }}</div>
+      {% endfor %}
+    </section>
+    <section class="panel suggestions-panel">
+      <p class="eyebrow">Your next edits</p><h2>Practical suggestions</h2>
+      <ol class="suggestion-list">{% for suggestion in report_data.suggestions %}<li>{{ suggestion }}</li>{% endfor %}</ol>
+    </section>
+    <section class="panel method-result-panel">
+      <p class="eyebrow">Analysis method</p><h2>{{ report.analysis_method }}</h2>
+      <p>{{ report.score_formula }}</p>
+      <p class="disclaimer-inline"><strong>Important:</strong> This score is an estimate produced by this application's own scoring method. It is not an official score from a commercial Applicant Tracking System and does not predict a hiring decision.</p>
+    </section>
+    <details class="panel preview-panel">
+      <summary>Preview extracted resume text</summary>
+      <p class="preview-hint">Check that text extraction looks complete. Scanned PDFs are not supported in this version.</p>
+      <pre>{{ report.resume.extracted_text }}</pre>
+    </details>
+  </div>
+  <div class="results-actions"><a class="text-link" href="{{ url_for('main.dashboard') }}">← Analyze another resume</a><a class="text-link" href="{{ url_for('main.history') }}">View analysis history →</a></div>
+</section>
+{% endblock %}

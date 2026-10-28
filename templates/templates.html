@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Resume templates{% endblock %}
+{% block content %}
+<section class="container feature-page">
+  <div class="results-topline"><div><p class="eyebrow">Resume builder</p><h1>Templates for your next opportunity</h1><p class="muted">Every layout supports editable sections and PDF/DOCX export. Premium designs remain locked until your plan is active.</p></div></div>
+  <section class="recommendation-callout panel">
+    <div><p class="eyebrow">Recommended for {{ profile.category }}</p><h2>Start with a layout that fits your story</h2><p>Suggestions: {{ guidance.templates|join(', ') }}</p></div>
+    <a class="button button-outline" href="{{ url_for('main.profile_settings') }}">Change profile category</a>
+  </section>
+  <div class="template-grid">
+    {% for template in templates %}
+    <article class="template-card panel">
+      <div class="template-preview accent-{{ template.accent }}" aria-label="Preview of {{ template.name }} resume template">
+        <div class="preview-paper">
+          <div class="preview-name"></div><div class="preview-subtitle"></div>
+          <div class="preview-rule"></div><div class="preview-heading"></div><div class="preview-line"></div><div class="preview-line short"></div>
+          <div class="preview-heading"></div><div class="preview-line"></div><div class="preview-line"></div><div class="preview-line short"></div>
+        </div>
+        {% if template.tier == 'premium' and not premium_active %}<span class="template-lock" aria-label="Premium template locked">🔒</span>{% endif %}
+      </div>
+      <div class="template-card-body">
+        <div class="template-title"><div><span class="template-tier {{ template.tier }}">{{ 'Premium' if template.tier == 'premium' else 'Free' }}</span><h2>{{ template.name }}</h2></div><span class="template-industry">{{ template.industry }}</span></div>
+        <p>{{ template.description }}</p>
+        <div class="tag-list">{% for feature in template.features %}<span class="keyword-tag">{{ feature }}</span>{% endfor %}</div>
+        {% if template.tier == 'free' or premium_active %}
+        <a class="button button-primary button-full" href="{{ url_for('main.select_template', template_id=template.id) }}">Use this template →</a>
+        {% else %}
+        <a class="button button-outline button-full" href="{{ url_for('main.pricing') }}">Unlock with Premium →</a>
+        {% endif %}
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

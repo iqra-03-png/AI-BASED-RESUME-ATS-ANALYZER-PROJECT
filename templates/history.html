@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Analysis history{% endblock %}
+{% block content %}
+<section class="container history-page">
+  <div class="results-topline"><div><p class="eyebrow">Your account</p><h1>Analysis history</h1><p class="muted">Only you can view and delete these saved reports.</p></div><a class="button button-primary" href="{{ url_for('main.dashboard') }}">New analysis <span aria-hidden="true">→</span></a></div>
+  {% if reports %}
+  <div class="panel history-table">
+    <div class="history-header"><span>Report</span><span>Job title</span><span>Date</span><span>Score</span><span>Actions</span></div>
+    {% for report in reports %}
+    <div class="history-row">
+      <span class="file-cell"><span class="file-icon">PDF</span><span><b>{{ report.resume.file_name }}</b><small>Analysis #{{ report.report_id }}</small></span></span>
+      <span>{{ report.job_description.job_title or "—" }}</span>
+      <span>{{ report.created_at.strftime('%b %d, %Y') }}</span>
+      <span><span class="score-pill">{{ report.ats_score }}/100</span></span>
+      <span class="history-actions"><a href="{{ url_for('main.report_detail', report_id=report.report_id) }}">Open</a><form method="post" action="{{ url_for('main.delete_report', report_id=report.report_id) }}" onsubmit="return confirm('Delete this report and its stored resume?')"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit" class="delete-link">Delete</button></form></span>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="panel empty-history"><span class="empty-icon">↗</span><h2>No saved analyses yet</h2><p>Once you analyze a resume, its result will appear here.</p><a class="button button-primary" href="{{ url_for('main.dashboard') }}">Start an analysis</a></div>
+  {% endif %}
+</section>
+{% endblock %}

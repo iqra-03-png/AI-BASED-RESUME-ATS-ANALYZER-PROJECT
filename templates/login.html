@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Log in{% endblock %}
+{% block content %}
+<section class="auth-wrap container">
+  <div class="auth-card">
+    <p class="eyebrow">Welcome back</p><h1>Log in to ResumeLens</h1>
+    <p class="muted">Your saved analyses are private to your account.</p>
+    <form method="post" novalidate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label for="email">Email address</label>
+      <input id="email" name="email" type="email" autocomplete="email" maxlength="254" required>
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" maxlength="128" required>
+      <button class="button button-primary button-full" type="submit">Log in</button>
+    </form>
+    <p class="auth-switch">New here? <a href="{{ url_for('auth.register') }}">Create an account</a></p>
+  </div>
+</section>
+{% endblock %}
