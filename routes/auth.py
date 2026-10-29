@@ -71,6 +71,21 @@ def login():
     return render_template("login.html")
 
 
+@auth_bp.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    if current_user.is_authenticated:
+        return redirect(url_for("main.dashboard"))
+    if request.method == "POST":
+        email = request.form.get("email", "").strip().lower()
+        user = User.query.filter_by(email=email).first()
+        if user is None:
+            flash("If that email is registered, a password reset link would be sent here.", "info")
+        else:
+            flash("Password reset emails are not configured for this local app yet. Add a trusted SMTP provider before enabling live resets.", "info")
+        return redirect(url_for("auth.login"))
+    return render_template("forgot_password.html")
+
+
 @auth_bp.post("/logout")
 def logout():
     logout_user()

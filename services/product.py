@@ -73,6 +73,63 @@ TEMPLATE_CATALOG = [
     },
 ]
 
+PRICING_PLANS = [
+    {
+        "id": "free",
+        "name": "Free Lifetime",
+        "price": 0,
+        "period": "forever",
+        "price_label": "₹0 forever",
+        "description": "A permanent starting plan for exploring the app and building a strong base resume.",
+        "features": [
+            "Basic ATS scoring and saved analysis history",
+            "Access to the available free templates",
+            "Editable resume builder with PDF and DOCX export",
+            "Role-specific profile recommendations",
+            "No renewal or card payment required",
+        ],
+        "cta": "Get started free",
+        "highlight": False,
+        "tier": "free",
+    },
+    {
+        "id": "pro",
+        "name": "Pro Monthly",
+        "price": 499,
+        "period": "/ month",
+        "price_label": "₹499 / month",
+        "description": "A lightweight upgrade for users who want more layout flexibility and faster resume refinement.",
+        "features": [
+            "Everything in Free Lifetime",
+            "Advanced template access and customization options",
+            "Priority resume improvement recommendations",
+            "Expanded profile guidance and premium workflow support",
+            "Monthly billing with flexible upgrade options",
+        ],
+        "cta": "Upgrade to Pro",
+        "highlight": False,
+        "tier": "pro",
+    },
+    {
+        "id": "premium",
+        "name": "Premium Yearly",
+        "price": 2999,
+        "period": "/ year",
+        "price_label": "₹2,999 / year",
+        "description": "The best-value plan for frequent users who want the full set of premium resume-building features.",
+        "features": [
+            "Everything in Pro",
+            "Premium templates and advanced customization",
+            "Premium-grade workflow support and layout options",
+            "Best-value annual plan for regular resume updates",
+            "Ideal for advanced job-search and career-growth workflows",
+        ],
+        "cta": "Upgrade to Premium",
+        "highlight": True,
+        "tier": "premium",
+    },
+]
+
 PROFILE_GUIDANCE = {
     "Student": {
         "templates": ["Clear", "Compact"],

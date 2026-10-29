@@ -2,15 +2,68 @@
 {% block title %}Plans and pricing{% endblock %}
 {% block content %}
 <section class="container feature-page pricing-page">
-  <div class="section-heading"><p class="eyebrow">Plans</p><h1>Choose the support you need</h1><p>Start free. Upgrade to unlock premium layouts and timed scanner sessions.</p></div>
+  <div class="section-heading">
+    <p class="eyebrow">Plans</p>
+    <h1>Choose the plan that fits your resume workflow</h1>
+    <p>Keep free features available for everyone, while giving more ambitious job seekers a path to Pro and Premium upgrades.</p>
+  </div>
+
   <div class="pricing-grid">
-    <article class="panel price-card"><p class="eyebrow">Free</p><h2>$0 <small>/ always</small></h2><p>Everything you need to build a simple, readable resume.</p><ul><li>Free resume builder and exports</li><li>Three ATS-friendly templates</li><li>Resume analysis and saved reports</li><li>Profile recommendations</li></ul><a class="button button-outline button-full" href="{{ url_for('main.dashboard') if current_user.is_authenticated else url_for('auth.register') }}">Get started free</a></article>
-    <article class="panel price-card price-premium"><span class="premium-ribbon">POPULAR</span><p class="eyebrow">Premium</p><h2>$9 <small>/ month · demo price</small></h2><p>More ways to tailor your resume and a dedicated timed scan session.</p><ul><li>Everything in Free</li><li>Five industry-specific premium templates</li><li>Two-minute scanner sessions; restart while subscribed</li><li>30-day demo entitlement with renewal option</li></ul>
-      {% if premium_active %}<div class="active-plan" role="status">Premium is active until {{ profile.subscription_expires_at.strftime('%b %d, %Y') if profile.subscription_expires_at else 'expiry' }}.</div>{% endif %}
-      {% if current_user.is_authenticated %}<form method="post" action="{{ url_for('main.demo_upgrade') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="button button-primary button-full" type="submit">{{ 'Renew demo Premium for 30 days' if premium_active else 'Activate 30-day Premium demo' }}</button></form>
-      {% else %}<a class="button button-primary button-full" href="{{ url_for('auth.register') }}">Create account to upgrade</a>{% endif %}
-      <p class="demo-note">Demo subscription only — no payment is processed and no card details are collected. Live billing is not configured.</p>
+    {% for plan in pricing_plans %}
+    <article class="panel pricing-card {% if plan.highlight %}pricing-card-featured{% endif %} {% if current_plan == plan.id %}pricing-card-current{% endif %}">
+      {% if plan.highlight %}<span class="pricing-badge">Best value</span>{% endif %}
+      <p class="eyebrow plan-tier">{{ plan.name }}</p>
+      <h2>{{ plan.price_label }}<small>{{ plan.period }}</small></h2>
+      <p class="plan-description">{{ plan.description }}</p>
+      <ul>
+        {% for feature in plan.features %}
+        <li>{{ feature }}</li>
+        {% endfor %}
+      </ul>
+      {% if current_user.is_authenticated %}
+        {% if plan.id == "free" %}
+          <form method="get" action="{{ url_for('main.checkout_plan', plan_id='free') }}">
+            <button class="button {% if plan.highlight %}button-primary{% else %}button-outline{% endif %} button-full" type="submit">{{ 'Current plan' if current_plan == 'free' else 'Stay on Free Lifetime' }}</button>
+          </form>
+        {% else %}
+          <form method="get" action="{{ url_for('main.checkout_plan', plan_id=plan.id) }}">
+            <button class="button {% if plan.highlight %}button-primary{% else %}button-outline{% endif %} button-full" type="submit">{{ plan.cta }}</button>
+          </form>
+        {% endif %}
+      {% else %}
+        <a class="button {% if plan.highlight %}button-primary{% else %}button-outline{% endif %} button-full" href="{{ url_for('auth.register') }}">{{ plan.cta }}</a>
+      {% endif %}
     </article>
+    {% endfor %}
+  </div>
+  {% if premium_active %}<div class="active-plan" role="status">Premium is active until {{ profile.subscription_expires_at.strftime('%b %d, %Y') if profile.subscription_expires_at else 'expiry' }}.</div>{% endif %}
+  <p class="demo-note">Demo subscription only — no payment is processed and no card details are collected. Live billing is disabled until Razorpay keys are configured in the environment, and the app remains in a safe test-mode checkout path until then.</p>
+
+  <div class="comparison-panel panel">
+    <div class="section-heading compact">
+      <p class="eyebrow">Plan comparison</p>
+      <h2>What each subscription unlocks</h2>
+    </div>
+    <div class="comparison-table-wrap">
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>Free Lifetime</th>
+            <th>Pro Monthly</th>
+            <th>Premium Yearly</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>ATS scoring and reports</td><td>Included</td><td>Included</td><td>Included</td></tr>
+          <tr><td>Free templates</td><td>Included</td><td>Included</td><td>Included</td></tr>
+          <tr><td>Advanced template library</td><td>Limited</td><td>Included</td><td>Included</td></tr>
+          <tr><td>Premium layout customization</td><td>—</td><td>Included</td><td>Included</td></tr>
+          <tr><td>Premium scanner access</td><td>—</td><td>Coming Soon</td><td>Included</td></tr>
+          <tr><td>Best value for frequent users</td><td>Starter</td><td>Flexible</td><td>Most value</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </section>
 {% endblock %}

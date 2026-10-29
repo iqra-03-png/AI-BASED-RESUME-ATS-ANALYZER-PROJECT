@@ -10,3 +10,11 @@ instance/
 uploads/
 reports/
 .DS_Store
+.venv/
+__pycache__/
+.pytest_cache/
+.env
+instance/
+*.sqlite
+*.sqlite3
+.DS_Store

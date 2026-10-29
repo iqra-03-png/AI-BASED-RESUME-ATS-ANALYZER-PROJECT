@@ -7,14 +7,43 @@
     <div><p class="eyebrow">Recommended for {{ profile.category }}</p><h2>Start with a layout that fits your story</h2><p>Suggestions: {{ guidance.templates|join(', ') }}</p></div>
     <a class="button button-outline" href="{{ url_for('main.profile_settings') }}">Change profile category</a>
   </section>
+
+  <div class="template-filters" aria-label="Template categories">
+    <span class="filter-pill active">All templates</span>
+    <span class="filter-pill">Free</span>
+    <span class="filter-pill">Premium</span>
+    <span class="filter-pill">Professional</span>
+  </div>
+
   <div class="template-grid">
     {% for template in templates %}
     <article class="template-card panel">
       <div class="template-preview accent-{{ template.accent }}" aria-label="Preview of {{ template.name }} resume template">
-        <div class="preview-paper">
-          <div class="preview-name"></div><div class="preview-subtitle"></div>
-          <div class="preview-rule"></div><div class="preview-heading"></div><div class="preview-line"></div><div class="preview-line short"></div>
-          <div class="preview-heading"></div><div class="preview-line"></div><div class="preview-line"></div><div class="preview-line short"></div>
+        <div class="preview-paper preview-{{ template.id }}">
+          <div class="preview-resume">
+            <div class="preview-top">
+              <div class="preview-name">Alicia Morgan</div>
+              <div class="preview-title">Product Designer</div>
+              <div class="preview-contact">alicia@portfolio.dev · +91 98765 43210 · Mumbai</div>
+            </div>
+            <div class="preview-summary">Product designer with 6+ years building human-centered digital experiences and measurable product outcomes.</div>
+            <div class="preview-section">
+              <div class="preview-section-title">Skills</div>
+              <div class="preview-tag-list"><span>Figma</span><span>UX</span><span>Research</span></div>
+            </div>
+            <div class="preview-section">
+              <div class="preview-section-title">Experience</div>
+              <ul class="preview-bullets">
+                <li>Led redesign of onboarding flow; +32% activation.</li>
+                <li>Partnered with PM and engineering to ship 3 product launches.</li>
+              </ul>
+            </div>
+            <div class="preview-section">
+              <div class="preview-section-title">Education</div>
+              <div class="preview-line"></div>
+              <div class="preview-line short"></div>
+            </div>
+          </div>
         </div>
         {% if template.tier == 'premium' and not premium_active %}<span class="template-lock" aria-label="Premium template locked">🔒</span>{% endif %}
       </div>
@@ -23,9 +52,9 @@
         <p>{{ template.description }}</p>
         <div class="tag-list">{% for feature in template.features %}<span class="keyword-tag">{{ feature }}</span>{% endfor %}</div>
         {% if template.tier == 'free' or premium_active %}
-        <a class="button button-primary button-full" href="{{ url_for('main.select_template', template_id=template.id) }}">Use this template →</a>
+        <a class="button button-primary button-full" href="{{ url_for('main.select_template', template_id=template.id) }}">Use Template</a>
         {% else %}
-        <a class="button button-outline button-full" href="{{ url_for('main.pricing') }}">Unlock with Premium →</a>
+        <a class="button button-outline button-full" href="{{ url_for('main.pricing') }}">Unlock with Premium</a>
         {% endif %}
       </div>
     </article>

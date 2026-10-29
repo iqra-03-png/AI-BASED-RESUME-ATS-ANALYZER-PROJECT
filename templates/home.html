@@ -9,7 +9,7 @@
       <p class="hero-lead">Compare your resume with a job description, see what aligns, and get practical ideas for your next edit.</p>
       <div class="hero-actions">
         <a class="button button-primary" href="{{ url_for('auth.register') if not current_user.is_authenticated else url_for('main.dashboard') }}">Analyze resume <span aria-hidden="true">→</span></a>
-        <a class="text-link" href="#how-it-works">How it works</a>
+        <a class="text-link" href="{{ url_for('main.ai_assistant') if current_user.is_authenticated else url_for('auth.register') }}">AI Resume Assistant</a>
       </div>
       <p class="fine-note">Your documents are processed locally by this app and are never sent to an external AI service.</p>
     </div>

@@ -18,3 +18,7 @@ class Config:
     SESSION_COOKIE_SAMESITE = "Lax"
     SESSION_COOKIE_SECURE = os.environ.get("COOKIE_SECURE", "false").lower() == "true"
     WTF_CSRF_TIME_LIMIT = 3600
+    RAZORPAY_KEY_ID = os.environ.get("RAZORPAY_KEY_ID")
+    RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET")
+    RAZORPAY_WEBHOOK_SECRET = os.environ.get("RAZORPAY_WEBHOOK_SECRET")
+    RAZORPAY_MODE = os.environ.get("RAZORPAY_MODE", "test").lower()

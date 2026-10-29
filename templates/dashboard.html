@@ -9,12 +9,22 @@
   <article class="panel stat-card"><span>Saved reports</span><strong>{{ scan_count }}</strong><small>All completed scans</small></article>
   <article class="panel stat-card"><span>Average ATS estimate</span><strong>{{ average_score if average_score is not none else '—' }}{% if average_score is not none %}<small>/100</small>{% endif %}</strong><small>Across your saved reports</small></article>
   <article class="panel stat-card"><span>Resume drafts</span><strong>{{ saved_resumes|length if saved_resumes|length < 5 else '5+' }}</strong><small>Saved in your workspace</small></article>
-  <article class="panel stat-card"><span>Plan</span><strong>{{ 'Premium' if premium_active else 'Free' }}</strong><small>{% if premium_active %}Active subscription{% else %}<a href="{{ url_for('main.pricing') }}">See Premium options</a>{% endif %}</small></article>
+  <article class="panel stat-card"><span>Plan</span><strong>{{ 'Premium' if premium_active else 'Pro' if profile.plan == 'pro' else 'Free' }}</strong><small>{% if profile.subscription_expires_at %}Active until {{ profile.subscription_expires_at.strftime('%b %d, %Y') }}{% else %}<a href="{{ url_for('main.pricing') }}">Choose a paid plan</a>{% endif %}</small></article>
+</section>
+<section class="container premium-banner">
+  <div>
+    <p class="eyebrow">Subscription status</p>
+    <h2>{% if premium_active %}Premium plan is active{% elif profile.plan == 'pro' %}Pro plan is active{% else %}Free Lifetime plan is active{% endif %}</h2>
+    <p>{% if profile.subscription_expires_at %}Renewal or expiry date: {{ profile.subscription_expires_at.strftime('%b %d, %Y') }}{% else %}No paid renewal is due right now.{% endif %} · Payment status: {{ profile.payment_status if profile.payment_status else 'inactive' }}</p>
+  </div>
+  <a class="button button-primary" href="{{ url_for('main.subscription_manage') }}">Manage subscription</a>
 </section>
 <section class="container dashboard-shortcuts">
   <a class="shortcut-card" href="{{ url_for('main.templates') }}"><span>01</span><b>Browse templates</b><small>Choose a free or premium design</small><span aria-hidden="true">→</span></a>
   <a class="shortcut-card" href="{{ url_for('main.dashboard') }}#resume-analyzer"><span>02</span><b>Analyze a resume</b><small>Compare with a job description</small><span aria-hidden="true">→</span></a>
-  <a class="shortcut-card" href="{{ url_for('main.profile_settings') }}"><span>03</span><b>Personalize your profile</b><small>Get role-specific suggestions</small><span aria-hidden="true">→</span></a>
+  <a class="shortcut-card" href="{{ url_for('main.ai_assistant') }}"><span>03</span><b>AI Resume Assistant</b><small>Draft stronger wording and updates</small><span aria-hidden="true">→</span></a>
+  <a class="shortcut-card" href="{{ url_for('main.ai_analyzer') }}"><span>04</span><b>AI Resume Analyzer</b><small>Review role fit and next steps</small><span aria-hidden="true">→</span></a>
+  <a class="shortcut-card" href="{{ url_for('main.profile_settings') }}"><span>05</span><b>Personalize your profile</b><small>Get role-specific suggestions</small><span aria-hidden="true">→</span></a>
 </section>
 <section class="container guidance-panel panel">
   <div><p class="eyebrow">Personalized for {{ profile.category }}</p><h2>Make your next edit count</h2></div>

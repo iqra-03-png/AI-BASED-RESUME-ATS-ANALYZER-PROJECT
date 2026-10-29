@@ -94,6 +94,11 @@ class UserProfile(db.Model):
     category = db.Column(db.String(80), nullable=False, default="Other Professional")
     plan = db.Column(db.String(20), nullable=False, default="free")
     subscription_expires_at = db.Column(db.DateTime(timezone=True), nullable=True)
+    subscription_started_at = db.Column(db.DateTime(timezone=True), nullable=True)
+    payment_provider = db.Column(db.String(30), nullable=False, default="none")
+    payment_status = db.Column(db.String(30), nullable=False, default="inactive")
+    payment_reference = db.Column(db.String(255), nullable=True)
+    payment_order_id = db.Column(db.String(255), nullable=True)
     scanner_expires_at = db.Column(db.DateTime(timezone=True), nullable=True)
 
     user = db.relationship("User", back_populates="profile")

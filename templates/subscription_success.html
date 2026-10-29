@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Subscription active{% endblock %}
+{% block content %}
+<section class="container page-heading">
+  <div class="success-banner">
+    <p class="eyebrow">Payment verified</p>
+    <h1>Your {{ profile.plan.title() }} subscription is active.</h1>
+    <p class="subtle">Your checkout has been verified on the server and your plan has been activated securely.</p>
+    <div class="checkout-actions">
+      <a class="button button-primary" href="{{ url_for('main.dashboard') }}">Return to dashboard</a>
+      <a class="button button-outline" href="{{ url_for('main.subscription_manage') }}">Manage subscription</a>
+    </div>
+  </div>
+</section>
+<section class="container checkout-grid">
+  <div class="billing-box">
+    <p class="eyebrow">Plan details</p>
+    <h2>{{ profile.plan.title() }}</h2>
+    <ul>
+      <li>Plan status: active</li>
+      <li>Provider: {{ profile.payment_provider if profile.payment_provider and profile.payment_provider != 'none' else 'demo' }}</li>
+      <li>Payment reference: {{ profile.payment_reference if profile.payment_reference else 'n/a' }}</li>
+      <li>Renewal or expiry: {{ profile.subscription_expires_at.strftime('%b %d, %Y') if profile.subscription_expires_at else 'not available' }}</li>
+    </ul>
+  </div>
+  <div class="billing-box">
+    <p class="eyebrow">What you can do next</p>
+    <ul>
+      <li>Use the Premium Scanner with your active plan.</li>
+      <li>Unlock premium resume templates and premium workflow features.</li>
+      <li>Manage your subscription from the dashboard when needed.</li>
+    </ul>
+  </div>
+</section>
+{% endblock %}
