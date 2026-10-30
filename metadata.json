@@ -1,0 +1,6 @@
+{
+  "name": "ResuNova Admin Dashboard",
+  "description": "Enterprise admin dashboard for ResuNova AI Resume ATS Analyzer platform with user management, job domains, skills catalog, resume analysis monitoring, and analytics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
