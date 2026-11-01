@@ -1,8 +1,6 @@
 {
-  "name": "ResuNova - AI-Powered Resume Analyzer & ATS Platform",
-  "description": "Professional full-stack AI resume analyzer, ATS scoring, skill gap detection, interview preparation, shared template builder, and AI career assistant.",
+  "name": "ResuNova Admin Dashboard",
+  "description": "Enterprise admin dashboard for ResuNova AI Resume ATS Analyzer platform with user management, job domains, skills catalog, resume analysis monitoring, and analytics.",
   "requestFramePermissions": [],
-  "majorCapabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
-  ]
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
