@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Create Admin Account{% endblock %}
+{% block head %}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/login.css') }}" rel="stylesheet">
+{% endblock %}
+{% block content %}
+<section class="login-screen">
+  <aside class="login-brand-panel">
+    <div class="login-decoration login-decoration-one"></div>
+    <div class="login-decoration login-decoration-two"></div>
+    <div class="login-brand-content">
+      <a class="login-brand" href="{{ url_for('main.home') }}" aria-label="ResuNova home">
+        <span class="login-brand-mark" aria-hidden="true">R</span>
+        <span>ResuNova</span>
+      </a>
+      <h2 class="login-headline">Get your resume <span>past the ATS</span></h2>
+      <p class="login-intro">Create an authorized administrator account to manage ResuNova.</p>
+      <img class="login-illustration" src="{{ url_for('static', filename='assets/resume-scan.svg') }}" alt="A resume being scanned with a 92 ATS score, a green check, and Java and React skill matches">
+      <ul class="login-features">
+        <li><span aria-hidden="true">✓</span>Instant ATS score and keyword match</li>
+        <li><span aria-hidden="true">✓</span>Smart suggestions to improve your resume</li>
+      </ul>
+    </div>
+  </aside>
+
+  <div class="login-form-panel">
+    <div class="login-form-card admin-registration-card">
+      <p class="login-eyebrow">Authorized access</p>
+      <h1>Create Admin Account</h1>
+      <p class="login-subtitle">Enter your details and the invitation key.</p>
+
+      <form class="login-form" method="post" action="{{ url_for('auth.admin_register') }}" novalidate data-registration-form>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="login-field">
+          <label for="name">Full Name</label>
+          <input id="name" name="name" type="text" autocomplete="name" maxlength="100" required value="{{ form_data.name }}" aria-describedby="name-error" {% if errors.get('name') %}aria-invalid="true"{% endif %}>
+          <p class="login-field-error" id="name-error" role="alert">{{ errors.get('name', '') }}</p>
+        </div>
+
+        <div class="login-field">
+          <label for="email">Email Address</label>
+          <input id="email" name="email" type="email" autocomplete="email" inputmode="email" maxlength="254" required value="{{ form_data.email }}" aria-describedby="email-error" {% if errors.get('email') %}aria-invalid="true"{% endif %}>
+          <p class="login-field-error" id="email-error" role="alert">{{ errors.get('email', '') }}</p>
+        </div>
+
+        <div class="login-field">
+          <label for="password">Password</label>
+          <div class="password-field login-password-field">
+            <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" required aria-describedby="password-error" {% if errors.get('password') %}aria-invalid="true"{% endif %}>
+            <button class="password-toggle" type="button" aria-label="Show password" aria-pressed="false">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Zm10-2.5A2.5 2.5 0 1 1 12 14.5a2.5 2.5 0 0 1 0-5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </button>
+          </div>
+          <p class="login-field-error" id="password-error" role="alert">{{ errors.get('password', '') }}</p>
+        </div>
+
+        <div class="login-field">
+          <label for="confirm-password">Confirm Password</label>
+          <input id="confirm-password" name="confirm_password" type="password" autocomplete="new-password" minlength="8" required aria-describedby="confirm-password-error" {% if errors.get('confirm_password') %}aria-invalid="true"{% endif %}>
+          <p class="login-field-error" id="confirm-password-error" role="alert">{{ errors.get('confirm_password', '') }}</p>
+        </div>
+
+        <div class="login-field">
+          <label for="registration-key">Admin Registration Key</label>
+          <input id="registration-key" name="registration_key" type="password" autocomplete="off" required aria-describedby="registration-key-error" {% if errors.get('registration_key') %}aria-invalid="true"{% endif %}>
+          <p class="login-field-error" id="registration-key-error" role="alert">{{ errors.get('registration_key', '') }}</p>
+        </div>
+
+        <button class="login-primary-button admin-create-button" type="submit">Create Account</button>
+      </form>
+      <p class="login-register">Already have an account? <a href="{{ url_for('auth.login', role='admin') }}">Login Here</a></p>
+    </div>
+  </div>
+</section>
+{% endblock %}

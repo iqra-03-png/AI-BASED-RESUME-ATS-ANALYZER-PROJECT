@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+{% macro icon(name) -%}
+<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+  {% if name == 'dashboard' %}<rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="10" width="8" height="11" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/>
+  {% elif name == 'users' %}<path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+  {% elif name == 'analytics' %}<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-5 5"/><path d="M15 9h4v4"/>
+  {% elif name == 'plans' %}<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h3"/>
+  {% elif name == 'reports' %}<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8"/>
+  {% elif name == 'feedback' %}<path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.6L3 21l1.9-5.6A8.5 8.5 0 1 1 21 11.5Z"/><path d="M8 11h.01M12 11h.01M16 11h.01"/>
+  {% elif name == 'notifications' %}<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/>
+  {% elif name == 'settings' %}<circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.7a8 8 0 0 1-1.7 1l-.3 1.8h-2.8l-.3-1.8a8 8 0 0 1-1.7-1l-1.7.7-1.4-2.4L5.1 15a8 8 0 0 1 0-2l-1.4-1.1 1.4-2.4 1.7.7a8 8 0 0 1 1.7-1l.3-1.8h2.8l.3 1.8a8 8 0 0 1 1.7 1l1.7-.7 1.4 2.4-1.4 1.1a8 8 0 0 1 .1 2Z" transform="translate(-1 -1)"/>
+  {% elif name == 'logout' %}<path d="M10 17l5-5-5-5M15 12H3"/><path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"/>
+  {% endif %}
+</svg>
+{%- endmacro %}
+{% set section_titles = {
+  'overview': 'Dashboard Overview',
+  'users': 'User Management',
+  'analytics': 'Resume Analytics',
+  'plans': 'Subscription Plans',
+  'reports': 'Generated Reports',
+  'feedback': 'Feedback & Reviews',
+  'notifications': 'Notifications',
+  'settings': 'Settings',
+  'search': 'Search Results'
+} %}
+{% block title %}{{ section_titles.get(section, 'Dashboard Overview') }} · Admin{% endblock %}
+{% block head %}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/admin_dashboard.css') }}" rel="stylesheet">
+{% endblock %}
+{% block content %}
+<div class="admin-console">
+  <aside class="admin-sidebar" id="admin-sidebar">
+    <a class="admin-brand" href="{{ url_for('main.admin_dashboard') }}">
+      <span class="admin-brand-mark">R</span>
+      <span>ResuNova<small>ADMIN CONSOLE</small></span>
+    </a>
+    <div class="admin-role-badge">ADMINISTRATOR</div>
+
+    <div class="engine-status">
+      <span class="engine-orb"></span>
+      <span><b>Gemini AI Engine</b><small>{{ 'Provider configured' if ai_provider_ready else 'Local analysis mode' }}</small></span>
+      <span class="engine-status-pill">{{ 'READY' if ai_provider_ready else 'LOCAL' }}</span>
+    </div>
+
+    <p class="sidebar-section-label">WORKSPACE</p>
+    <nav class="admin-menu" aria-label="Admin dashboard sections">
+      {% for key, label, glyph in [
+        ('overview', 'Dashboard', 'dashboard'),
+        ('users', 'User Management', 'users'),
+        ('analytics', 'Resume Analytics', 'analytics'),
+        ('plans', 'Subscription Plans', 'plans'),
+        ('reports', 'Reports', 'reports'),
+        ('feedback', 'Feedback & Reviews', 'feedback'),
+        ('notifications', 'Notifications', 'notifications'),
+        ('settings', 'Settings', 'settings')
+      ] %}
+      <a class="admin-menu-link{% if section == key %} is-active{% endif %}" href="{{ url_for('main.admin_dashboard', section=key) }}" {% if section == key %}aria-current="page"{% endif %}>
+        <span class="menu-icon">{{ icon(glyph) }}</span><span>{{ label }}</span>
+        {% if key == 'notifications' %}<span class="menu-count">0</span>{% endif %}
+      </a>
+      {% endfor %}
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="sidebar-profile">
+        <span class="admin-avatar">{{ current_user.name[:1]|upper }}</span>
+        <span class="sidebar-profile-copy"><b>{{ current_user.name }}</b><small>Super Admin</small></span>
+        <span class="profile-presence"></span>
+      </div>
+      <form method="post" action="{{ url_for('auth.logout') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="sidebar-logout" type="submit">{{ icon('logout') }}<span>Log out</span></button>
+      </form>
+    </div>
+  </aside>
+
+  <main class="admin-main">
+    <header class="admin-topbar">
+      <div class="topbar-heading">
+        <button class="sidebar-toggle" type="button" aria-label="Open dashboard navigation" aria-expanded="false" aria-controls="admin-sidebar" data-sidebar-toggle>☰</button>
+        <div>
+          <h1>{{ section_titles.get(section, 'Dashboard Overview') }}</h1>
+          <div class="admin-breadcrumb"><span>ResuNova</span><span aria-hidden="true">/</span><b>{{ section_titles.get(section, 'Dashboard Overview') }}</b></div>
+        </div>
+      </div>
+      <div class="topbar-tools">
+        <form class="admin-search" action="{{ url_for('main.admin_dashboard') }}" method="get" role="search">
+          <input type="search" name="q" value="{{ search }}" placeholder="Search candidates, email, roles, reports..." aria-label="Search users and reports">
+          <button type="submit" aria-label="Search">{{ icon('analytics') }}</button>
+        </form>
+        <a class="test-app-button" href="{{ url_for('main.templates') }}">Test User App <span aria-hidden="true">↗</span></a>
+        <a class="topbar-notifications" href="{{ url_for('main.admin_dashboard', section='notifications') }}" aria-label="Notifications, 0 unread">
+          {{ icon('notifications') }}<span>0</span>
+        </a>
+        <details class="admin-profile-menu">
+          <summary>
+            <span class="admin-avatar topbar-avatar">{{ current_user.name[:1]|upper }}</span>
+            <span class="topbar-profile-copy"><b>{{ current_user.name }}</b><small>Administrator</small></span>
+            <span class="profile-chevron">⌄</span>
+          </summary>
+          <div class="profile-dropdown">
+            <a href="{{ url_for('main.profile_settings') }}">Admin profile settings</a>
+            <a href="{{ url_for('main.admin_dashboard', section='settings') }}">System settings</a>
+          </div>
+        </details>
+      </div>
+    </header>
+
+    <div class="admin-content">
+      {% if section == 'overview' %}
+      <div class="dashboard-welcome">
+        <div><p class="admin-kicker">OVERVIEW</p><h2>Welcome back, {{ current_user.name.split(' ')[0] }}</h2><p>Here is what is happening across your resume platform.</p></div>
+        <span class="date-chip">{{ user_series[-1].date }}</span>
+      </div>
+
+      <section class="admin-stat-grid" aria-label="Platform statistics">
+        <article class="admin-stat-card"><div class="stat-top"><span class="stat-icon users-icon">{{ icon('users') }}</span><span class="stat-period">ALL TIME</span></div><p>Total Registered Users</p><strong>{{ total_users }}</strong><div class="stat-foot"><span class="growth-chip{% if user_growth.startswith('-') %} is-down{% endif %}">{{ user_growth }}</span><span>vs previous 30 days</span><svg viewBox="0 0 84 28" aria-hidden="true"><polyline points="{{ user_spark_points }}"/></svg></div></article>
+        <article class="admin-stat-card"><div class="stat-top"><span class="stat-icon resume-icon">{{ icon('reports') }}</span><span class="stat-period">ALL TIME</span></div><p>Total Resumes Analysed</p><strong>{{ total_resumes }}</strong><div class="stat-foot"><span class="growth-chip{% if report_growth.startswith('-') %} is-down{% endif %}">{{ report_growth }}</span><span>analyses vs previous 30 days</span><svg viewBox="0 0 84 28" aria-hidden="true"><polyline points="{{ report_spark_points }}"/></svg></div></article>
+        <article class="admin-stat-card"><div class="stat-top"><span class="stat-icon premium-icon">{{ icon('plans') }}</span><span class="stat-period">ACTIVE</span></div><p>Premium Subscribers</p><strong>{{ paid_subscribers }}</strong><div class="stat-foot"><span class="growth-chip{% if subscriber_growth.startswith('-') %} is-down{% endif %}">{{ subscriber_growth }}</span><span>vs previous 30 days</span><svg viewBox="0 0 84 28" aria-hidden="true"><polyline points="{{ subscriber_spark_points }}"/></svg></div></article>
+        <article class="admin-stat-card"><div class="stat-top"><span class="stat-icon reports-icon">{{ icon('analytics') }}</span><span class="stat-period">ALL TIME</span></div><p>Reports Generated</p><strong>{{ total_reports }}</strong><div class="stat-foot"><span class="growth-chip{% if report_growth.startswith('-') %} is-down{% endif %}">{{ report_growth }}</span><span>vs previous 30 days</span><svg viewBox="0 0 84 28" aria-hidden="true"><polyline points="{{ report_spark_points }}"/></svg></div></article>
+      </section>
+
+      <section class="admin-middle-grid">
+        <article class="admin-panel activity-panel">
+          <div class="panel-title-row"><div><p class="admin-kicker">PLATFORM ACTIVITY</p><h3>Resume Analysis Activity</h3></div><span class="live-sync{% if not database_connected %} is-offline{% endif %}"><i></i>{{ 'Database Connected' if database_connected else 'Database Unavailable' }}</span></div>
+          <div class="activity-legend"><span><i class="legend-resumes"></i>Resumes Analysed</span><span><i class="legend-signups"></i>New Signups</span><span class="activity-range">Last 14 days</span></div>
+          {% if total_reports or total_users %}
+          <div class="activity-chart">
+            <div class="chart-y-labels"><span>{{ chart_total }}</span><span>{{ (chart_total / 2)|round|int }}</span><span>0</span></div>
+            <svg viewBox="0 0 640 140" preserveAspectRatio="none" role="img" aria-label="Resume analyses and signups over the last 14 days">
+              <path class="chart-gridline" d="M0 20H640M0 70H640M0 120H640"/>
+              <polyline class="chart-line-resumes" points="{{ report_chart_points }}"/>
+              <polyline class="chart-line-signups" points="{{ user_chart_points }}"/>
+            </svg>
+          </div>
+          <div class="chart-x-labels">{% for day in report_series %}<span title="{{ day.date }}">{{ day.label }}</span>{% endfor %}</div>
+          {% else %}
+          <div class="admin-empty chart-empty"><span class="empty-art">{{ icon('analytics') }}</span><b>No activity data yet</b><p>Resume analysis and signup trends will appear when records exist.</p></div>
+          {% endif %}
+          <div class="daily-activity-row"><span><i class="daily-dot blue-dot"></i>Today’s analyses <b>{{ report_series[-1].count }}</b></span><span><i class="daily-dot purple-dot"></i>Today’s signups <b>{{ user_series[-1].count }}</b></span></div>
+        </article>
+
+        <article class="admin-panel plan-panel">
+          <div class="panel-title-row"><div><p class="admin-kicker">CUSTOMER MIX</p><h3>User Plan Distribution</h3></div><a class="panel-link" href="{{ url_for('main.admin_dashboard', section='plans') }}">View plans <span>→</span></a></div>
+          {% if plan_total %}
+          <div class="donut-wrap"><div class="admin-donut" style="background: {{ plan_gradient }}"><div><strong>{{ plan_total }}</strong><span>users</span></div></div></div>
+          <div class="plan-legend">
+            {% for plan in plan_distribution %}
+            <div><span class="plan-legend-label"><i class="plan-dot plan-{{ plan.id }}"></i>{{ plan.label }}</span><b>{{ plan.percentage }}%</b><small>{{ plan.count }} users</small></div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="admin-empty plan-empty"><span class="empty-art">{{ icon('plans') }}</span><b>No plan data yet</b><p>Plan distribution appears after users register.</p></div>
+          {% endif %}
+        </article>
+      </section>
+
+      <section class="admin-panel recent-panel">
+        <div class="panel-title-row"><div><p class="admin-kicker">LATEST RECORDS</p><h3>Recent Resume Reports</h3></div><a class="panel-link" href="{{ url_for('main.admin_dashboard', section='reports') }}">View all reports <span>→</span></a></div>
+        {% if reports %}
+        <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Report</th><th>Candidate</th><th>ATS Score</th><th>Created</th><th>Status</th></tr></thead><tbody>
+          {% for report in reports[:5] %}<tr><td><span class="report-id">#{{ report.report_id }}</span></td><td><b>{{ report.user.name }}</b><small>{{ report.user.email }}</small></td><td><span class="score-pill">{{ report.ats_score }}%</span></td><td>{{ report.created_at.strftime('%b %d, %Y') }}</td><td><span class="status-pill">Generated</span></td></tr>{% endfor %}
+        </tbody></table></div>
+        {% else %}<div class="admin-empty compact-empty"><b>No reports generated yet</b><p>Reports will appear here after users analyze resumes.</p></div>{% endif %}
+      </section>
+
+      <section class="admin-bottom-grid">
+        <article class="admin-panel engine-panel"><span class="settings-tile">{{ icon('analytics') }}</span><div><p class="admin-kicker">AI ENGINE</p><h3>Gemini AI Engine Management</h3><p>{{ 'A provider key is configured; provider integration status is available in app configuration.' if ai_provider_ready else 'The app is using its local analysis fallback. No AI provider is configured.' }}</p></div><span class="connection-label{% if not ai_provider_ready %} is-local{% endif %}">{{ 'Configured' if ai_provider_ready else 'Local mode' }}</span></article>
+        <article class="admin-panel templates-panel"><div><p class="admin-kicker">RESUME BUILDER</p><h3>Template Catalog</h3><p>{{ templates|length }} templates · {{ free_template_count }} Free · {{ premium_template_count }} Premium</p></div><a class="admin-primary-button" href="{{ url_for('main.templates') }}">Open template catalog <span>→</span></a></article>
+      </section>
+
+      {% elif section == 'users' %}
+      <div class="section-intro"><p class="admin-kicker">ACCOUNTS</p><h2>User Management</h2><p>Registered user accounts from the existing ResuNova database. Admin accounts are excluded.</p></div>
+      <section class="admin-panel module-panel"><div class="panel-title-row"><div><h3>Registered Users</h3><p>{{ total_users }} total users</p></div></div>
+        {% if users %}<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>User</th><th>Email</th><th>Role</th><th>Plan</th><th>Joined</th></tr></thead><tbody>
+          {% for user in users %}<tr><td><span class="table-user"><span class="table-avatar">{{ user.name[:1]|upper }}</span><b>{{ user.name }}</b></span></td><td>{{ user.email }}</td><td><span class="role-pill">User</span></td><td><span class="plan-text">{{ user_plan_by_id.get(user.user_id, 'Free') }}</span></td><td>{{ user.created_at.strftime('%b %d, %Y') }}</td></tr>{% endfor %}
+        </tbody></table></div>{% else %}<div class="admin-empty compact-empty"><b>No registered users found</b><p>{% if search %}Try another name or email address.{% else %}New user accounts will appear here when registered.{% endif %}</p></div>{% endif %}
+      </section>
+
+      {% elif section == 'analytics' %}
+      <div class="section-intro"><p class="admin-kicker">DATA & INSIGHTS</p><h2>Resume Analytics</h2><p>Analysis and signup activity calculated from saved database records.</p></div>
+      <section class="admin-stat-grid analytics-stat-grid">
+        <article class="admin-stat-card"><span class="stat-icon resume-icon">{{ icon('reports') }}</span><p>Total Resumes Analysed</p><strong>{{ total_resumes }}</strong><small>Saved resume records</small></article>
+        <article class="admin-stat-card"><span class="stat-icon reports-icon">{{ icon('analytics') }}</span><p>Reports Generated</p><strong>{{ total_reports }}</strong><small>Saved analysis reports</small></article>
+        <article class="admin-stat-card"><span class="stat-icon users-icon">{{ icon('users') }}</span><p>New User Signups</p><strong>{{ user_series|sum(attribute='count') }}</strong><small>Last 14 days</small></article>
+      </section>
+      <section class="admin-panel activity-panel analytics-activity"><div class="panel-title-row"><div><p class="admin-kicker">14-DAY WINDOW</p><h3>Daily Activity</h3></div><span class="live-sync{% if not database_connected %} is-offline{% endif %}"><i></i>{{ 'Database Connected' if database_connected else 'Database Unavailable' }}</span></div>
+        {% if total_reports or total_users %}<div class="activity-legend"><span><i class="legend-resumes"></i>Resumes Analysed</span><span><i class="legend-signups"></i>New Signups</span></div><div class="activity-chart"><div class="chart-y-labels"><span>{{ chart_total }}</span><span>{{ (chart_total / 2)|round|int }}</span><span>0</span></div><svg viewBox="0 0 640 140" preserveAspectRatio="none" role="img" aria-label="Daily resume analyses and user signups"><path class="chart-gridline" d="M0 20H640M0 70H640M0 120H640"/><polyline class="chart-line-resumes" points="{{ report_chart_points }}"/><polyline class="chart-line-signups" points="{{ user_chart_points }}"/></svg></div><div class="chart-x-labels">{% for day in report_series %}<span title="{{ day.date }}">{{ day.label }}</span>{% endfor %}</div>{% else %}<div class="admin-empty"><b>No analytics records yet</b><p>Charts will populate from real user and analysis activity.</p></div>{% endif %}
+      </section>
+
+      {% elif section == 'plans' %}
+      <div class="section-intro"><p class="admin-kicker">BILLING OVERVIEW</p><h2>Subscription Plans</h2><p>Plan catalog and active subscriber counts based on user profile records.</p></div>
+      <section class="admin-stat-grid analytics-stat-grid">
+        {% for plan in plan_distribution %}<article class="admin-stat-card"><span class="stat-icon plan-icon plan-{{ plan.id }}">{{ icon('plans') }}</span><p>{{ plan.label }} Users</p><strong>{{ plan.count }}</strong><small>{{ plan.percentage }}% of registered users</small></article>{% endfor %}
+      </section>
+      <section class="plan-catalog-grid">{% for plan in plans %}<article class="admin-panel catalog-plan"><span class="plan-tag">{{ plan.tier|capitalize }}</span><h3>{{ plan.name }}</h3><strong>{{ plan.price_label }}</strong><p>{{ plan.description }}</p><ul>{% for feature in plan.features[:4] %}<li>{{ feature }}</li>{% endfor %}</ul><a href="{{ url_for('main.pricing') }}" class="panel-link">View plan details <span>→</span></a></article>{% endfor %}</section>
+      <p class="admin-note">Plan definitions and prices are managed in the existing application catalog; this dashboard displays them without changing billing behavior.</p>
+
+      {% elif section == 'reports' %}
+      <div class="section-intro"><p class="admin-kicker">ANALYSIS OUTPUT</p><h2>Generated Reports</h2><p>Saved ATS analysis reports and their owning user. User reports remain protected by the existing ownership rules.</p></div>
+      <section class="admin-panel module-panel"><div class="panel-title-row"><div><h3>All Reports</h3><p>{{ total_reports }} saved reports</p></div></div>
+        {% if reports %}<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Report</th><th>Candidate</th><th>Resume</th><th>ATS Score</th><th>Created</th></tr></thead><tbody>{% for report in reports %}<tr><td><span class="report-id">#{{ report.report_id }}</span></td><td><b>{{ report.user.name }}</b><small>{{ report.user.email }}</small></td><td>{{ report.resume.file_name }}</td><td><span class="score-pill">{{ report.ats_score }}%</span></td><td>{{ report.created_at.strftime('%b %d, %Y · %H:%M') }}</td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="admin-empty compact-empty"><b>No reports found</b><p>{% if search %}Try another user name, email or report ID.{% else %}Saved reports appear after a resume analysis is completed.{% endif %}</p></div>{% endif %}
+      </section>
+
+      {% elif section == 'feedback' %}
+      <div class="section-intro"><p class="admin-kicker">VOICE OF THE CUSTOMER</p><h2>Feedback & Reviews</h2><p>Review feedback submitted by ResuNova users.</p></div>
+      <section class="admin-panel empty-module"><span class="empty-art">{{ icon('feedback') }}</span><h3>No feedback records available</h3><p>This project does not currently store user feedback or review records. Nothing is fabricated for this section.</p></section>
+
+      {% elif section == 'notifications' %}
+      <div class="section-intro"><p class="admin-kicker">SYSTEM UPDATES</p><h2>Notifications</h2><p>System notifications available to the administrator.</p></div>
+      <section class="admin-panel empty-module"><span class="empty-art">{{ icon('notifications') }}</span><h3>No notifications to display</h3><p>This application does not currently persist system notifications. The unread count is zero.</p></section>
+
+      {% elif section == 'settings' %}
+      <div class="section-intro"><p class="admin-kicker">ADMINISTRATION</p><h2>Settings</h2><p>Application status and your administrator account.</p></div>
+      <section class="settings-grid">
+        <article class="admin-panel setting-card"><span class="settings-tile">{{ icon('analytics') }}</span><div><h3>Database Connection</h3><p>Existing application database connectivity check.</p><span class="setting-status{% if not database_connected %} is-offline{% endif %}"><i></i>{{ 'Connected' if database_connected else 'Unavailable' }}</span></div></article>
+        <article class="admin-panel setting-card"><span class="settings-tile">{{ icon('users') }}</span><div><h3>Admin Profile</h3><p>{{ current_user.name }} · {{ current_user.email }}</p><a class="panel-link" href="{{ url_for('main.profile_settings') }}">Manage profile <span>→</span></a></div></article>
+        <article class="admin-panel setting-card"><span class="settings-tile">{{ icon('analytics') }}</span><div><h3>AI Engine</h3><p>{{ 'A provider key is present; live model integration is not configured in this application.' if ai_provider_ready else 'Local-only mode is active; no provider credentials are configured.' }}</p><span class="setting-status{% if not ai_provider_ready %} is-offline{% endif %}"><i></i>{{ 'Provider configured' if ai_provider_ready else 'Local mode' }}</span></div></article>
+      </section>
+      <p class="admin-note">Sensitive environment variables and API keys are intentionally not displayed or editable here.</p>
+
+      {% else %}
+      <div class="section-intro"><p class="admin-kicker">DIRECTORY</p><h2>Search Results</h2><p>Matching users and saved reports for “{{ search }}”.</p></div>
+      <section class="admin-panel module-panel"><div class="panel-title-row"><div><h3>Users</h3><p>{{ users|length }} matches (up to 100 shown)</p></div></div>
+        {% if users %}<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>User</th><th>Email</th><th>Role</th><th>Joined</th></tr></thead><tbody>{% for user in users %}<tr><td><b>{{ user.name }}</b></td><td>{{ user.email }}</td><td><span class="role-pill">{{ user.role|capitalize }}</span></td><td>{{ user.created_at.strftime('%b %d, %Y') }}</td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="admin-empty compact-empty"><p>No matching users.</p></div>{% endif %}
+      </section>
+      <section class="admin-panel module-panel search-reports"><div class="panel-title-row"><div><h3>Reports</h3><p>{{ reports|length }} matches (up to 100 shown)</p></div></div>
+        {% if reports %}<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Report</th><th>Candidate</th><th>Score</th><th>Created</th></tr></thead><tbody>{% for report in reports %}<tr><td>#{{ report.report_id }}</td><td>{{ report.user.name }}<small>{{ report.user.email }}</small></td><td><span class="score-pill">{{ report.ats_score }}%</span></td><td>{{ report.created_at.strftime('%b %d, %Y') }}</td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="admin-empty compact-empty"><p>No matching reports.</p></div>{% endif %}
+      </section>
+      {% endif %}
+      <footer class="admin-footer"><span>ResuNova Admin Console</span><span>Live data from the connected application database</span></footer>
+    </div>
+  </main>
+</div>
+{% endblock %}
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/admin_dashboard.js') }}" defer></script>
+{% endblock %}

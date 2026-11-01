@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Manage subscription{% endblock %}
+{% block content %}
+<section class="container page-heading">
+  <p class="eyebrow">Subscription status</p>
+  <h1>Manage your plan</h1>
+</section>
+<section class="container checkout-grid">
+  <div class="billing-box">
+    <p class="eyebrow">Current plan</p>
+    <h2>{{ 'Premium' if premium_active else 'Pro' if pro_active else 'Free Lifetime' }}</h2>
+    {% if profile.subscription_expires_at %}
+      <p class="muted">Active through {{ profile.subscription_expires_at.strftime('%b %d, %Y') }}.</p>
+    {% else %}
+      <p class="muted">There is no active paid subscription at the moment.</p>
+    {% endif %}
+    {% if payment_ready %}
+      <div class="manage-actions">
+        {% if premium_active %}
+          <a class="button button-primary" href="{{ url_for('main.checkout_plan', plan_id='premium') }}">Renew Premium</a>
+        {% elif pro_active %}
+          <a class="button button-primary" href="{{ url_for('main.checkout_plan', plan_id='pro') }}">Renew Pro</a>
+        {% else %}
+          <a class="button button-primary" href="{{ url_for('main.pricing') }}">Choose a plan</a>
+        {% endif %}
+      </div>
+      <p class="payment-status">Recurring billing is only available when your Razorpay subscription setup has been created and authorized in the provider dashboard. This app does not claim auto-renewal unless that configuration is enabled.</p>
+    {% else %}
+      <p class="payment-status">Payment provider setup is not configured. Add Razorpay keys to activate hosted checkout and recurring billing support.</p>
+    {% endif %}
+  </div>
+  <aside class="billing-box">
+    <p class="eyebrow">Subscription details</p>
+    <ul>
+      <li>Plan: {{ profile.plan.title() if profile.plan else 'free' }}</li>
+      <li>Payment status: {{ profile.payment_status if profile.payment_status else 'inactive' }}</li>
+      <li>Provider: {{ profile.payment_provider if profile.payment_provider and profile.payment_provider != 'none' else 'not configured' }}</li>
+      {% if profile.subscription_expires_at %}
+      <li>Renewal or expiry: {{ profile.subscription_expires_at.strftime('%b %d, %Y') }}</li>
+      {% else %}
+      <li>Renewal or expiry: not applicable</li>
+      {% endif %}
+    </ul>
+    <div class="manage-actions">
+      <a class="button button-outline" href="{{ url_for('main.dashboard') }}">Back to dashboard</a>
+    </div>
+  </aside>
+</section>
+{% endblock %}

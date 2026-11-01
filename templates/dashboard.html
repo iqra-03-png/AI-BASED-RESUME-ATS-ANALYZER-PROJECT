@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Analyze a resume{% endblock %}
+{% block content %}
+<section class="page-heading container">
+  <p class="eyebrow">Your workspace</p><h1>Welcome, {{ current_user.name.split(' ')[0] }}</h1>
+  <p>Build a polished resume, compare it with a role, and keep every report together.</p>
+</section>
+<section class="container dashboard-stats">
+  <article class="panel stat-card"><span>Saved reports</span><strong>{{ scan_count }}</strong><small>All completed scans</small></article>
+  <article class="panel stat-card"><span>Average ATS estimate</span><strong>{{ average_score if average_score is not none else '—' }}{% if average_score is not none %}<small>/100</small>{% endif %}</strong><small>Across your saved reports</small></article>
+  <article class="panel stat-card"><span>Resume drafts</span><strong>{{ saved_resumes|length if saved_resumes|length < 5 else '5+' }}</strong><small>Saved in your workspace</small></article>
+  <article class="panel stat-card"><span>Plan</span><strong>{{ 'Premium' if premium_active else 'Pro' if profile.plan == 'pro' else 'Free' }}</strong><small>{% if profile.subscription_expires_at %}Active until {{ profile.subscription_expires_at.strftime('%b %d, %Y') }}{% else %}<a href="{{ url_for('main.pricing') }}">Choose a paid plan</a>{% endif %}</small></article>
+</section>
+<section class="container premium-banner">
+  <div>
+    <p class="eyebrow">Subscription status</p>
+    <h2>{% if premium_active %}Premium plan is active{% elif profile.plan == 'pro' %}Pro plan is active{% else %}Free Lifetime plan is active{% endif %}</h2>
+    <p>{% if profile.subscription_expires_at %}Renewal or expiry date: {{ profile.subscription_expires_at.strftime('%b %d, %Y') }}{% else %}No paid renewal is due right now.{% endif %} · Payment status: {{ profile.payment_status if profile.payment_status else 'inactive' }}</p>
+  </div>
+  <a class="button button-primary" href="{{ url_for('main.subscription_manage') }}">Manage subscription</a>
+</section>
+<section class="container dashboard-shortcuts">
+  <a class="shortcut-card" href="{{ url_for('main.templates') }}"><span>01</span><b>Browse templates</b><small>Choose a free or premium design</small><span aria-hidden="true">→</span></a>
+  <a class="shortcut-card" href="{{ url_for('main.dashboard') }}#resume-analyzer"><span>02</span><b>Analyze a resume</b><small>Compare with a job description</small><span aria-hidden="true">→</span></a>
+  <a class="shortcut-card" href="{{ url_for('main.ai_assistant') }}"><span>03</span><b>AI Resume Assistant</b><small>Draft stronger wording and updates</small><span aria-hidden="true">→</span></a>
+  <a class="shortcut-card" href="{{ url_for('main.ai_analyzer') }}"><span>04</span><b>AI Resume Analyzer</b><small>Review role fit and next steps</small><span aria-hidden="true">→</span></a>
+  <a class="shortcut-card" href="{{ url_for('main.profile_settings') }}"><span>05</span><b>Personalize your profile</b><small>Get role-specific suggestions</small><span aria-hidden="true">→</span></a>
+</section>
+<section class="container guidance-panel panel">
+  <div><p class="eyebrow">Personalized for {{ profile.category }}</p><h2>Make your next edit count</h2></div>
+  <div class="guidance-grid">
+    <div><h3>Recommended sections</h3><div class="tag-list">{% for item in guidance.sections %}<span class="skill-tag matched">{{ item }}</span>{% endfor %}</div></div>
+    <div><h3>Skills to highlight</h3><div class="tag-list">{% for item in guidance.skills %}<span class="keyword-tag">{{ item }}</span>{% endfor %}</div></div>
+    <p class="example-copy"><b>Example:</b> {{ guidance.example }}</p>
+  </div>
+</section>
+{% if premium_active %}
+<section class="container premium-banner">
+  <div><p class="eyebrow">Premium scanner</p><h2>{% if scanner_seconds %}Your 2-minute scan session is active{% else %}Ready for a focused scan session?{% endif %}</h2><p>{% if scanner_seconds %}Time remaining: {{ '%02d:%02d'|format(scanner_seconds // 60, scanner_seconds % 60) }}{% else %}Start a server-verified session when you are ready to scan.{% endif %}</p></div>
+  <a class="button button-primary" href="{{ url_for('main.premium_scanner') }}">Open scanner →</a>
+</section>
+{% endif %}
+<section class="container work-grid" id="resume-analyzer">
+  <form class="analysis-form panel" method="post" action="{{ url_for('main.analyze') }}" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="form-section-title"><span>01</span><div><h2>Upload your resume</h2><p>PDF or DOCX · 5 MB maximum</p></div></div>
+    <label class="upload-box" for="resume-file">
+      <span class="upload-symbol" aria-hidden="true">↑</span>
+      <strong id="file-name">Choose a resume file</strong>
+      <span>or drop a file here</span>
+      <input id="resume-file" name="resume" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" required>
+    </label>
+    <div class="form-section-title spaced"><span>02</span><div><h2>Add the job description</h2><p>More detail gives a more useful comparison.</p></div></div>
+    <div class="two-fields">
+      <div><label for="job-title">Job title <span class="optional">(optional)</span></label><input id="job-title" name="job_title" type="text" maxlength="150" placeholder="e.g. Junior Data Analyst"></div>
+      <div><label for="company-name">Company <span class="optional">(optional)</span></label><input id="company-name" name="company_name" type="text" maxlength="150" placeholder="e.g. Example Co."></div>
+    </div>
+    <label for="job-description">Job description</label>
+    <textarea id="job-description" name="job_description" rows="9" maxlength="20000" minlength="30" placeholder="Paste the job requirements, responsibilities, skills, and qualifications…" required></textarea>
+    <div class="text-meta"><span>At least 30 characters</span><span id="char-count">0 / 20,000</span></div>
+    <div class="privacy-note"><span aria-hidden="true">⌑</span><span>Your resume stays on this application. It is not sent to an external AI service.</span></div>
+    <button id="analyze-button" class="button button-primary button-full" type="submit"><span class="button-label">Analyze my resume</span><span class="loading-label" hidden>Analyzing…</span><span aria-hidden="true">→</span></button>
+  </form>
+  <aside class="side-column">
+    <div class="panel method-card"><p class="eyebrow">Scoring method</p><h2>Know how your score is made.</h2>
+      <div class="weight-row"><span>Keyword matching</span><b>40%</b></div>
+      <div class="weight-row"><span>Skills matching</span><b>25%</b></div>
+      <div class="weight-row"><span>Resume structure</span><b>15%</b></div>
+      <div class="weight-row"><span>Experience &amp; education</span><b>10%</b></div>
+      <div class="weight-row"><span>Readability</span><b>10%</b></div>
+      <p class="small-note">TF-IDF and cosine similarity compare text; a configurable dictionary detects common skills. This is a transparent estimate, not an official ATS score.</p>
+    </div>
+    {% if recent_reports %}
+    <div class="panel recent-card"><div class="panel-heading"><h2>Recent analyses</h2><a href="{{ url_for('main.history') }}">See all</a></div>
+      {% for report in recent_reports %}
+      <a class="recent-row" href="{{ url_for('main.report_detail', report_id=report.report_id) }}"><span class="recent-score">{{ report.ats_score }}</span><span><b>{{ report.job_description.job_title or report.resume.file_name }}</b><small>{{ report.created_at.strftime('%b %d, %Y') }}</small></span><span aria-hidden="true">↗</span></a>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </aside>
+</section>
+<section class="container dashboard-lower">
+  <div class="panel recent-card">
+    <div class="panel-heading"><h2>Saved resumes</h2><a href="{{ url_for('main.templates') }}">Create resume</a></div>
+    {% for draft in saved_resumes %}
+      <a class="recent-row" href="{{ url_for('main.resume_builder', draft_id=draft.draft_id) }}"><span class="file-icon">CV</span><span><b>{{ draft.title }}</b><small>Version {{ draft.version }} · {{ draft.updated_at.strftime('%b %d, %Y') }}</small></span><span aria-hidden="true">↗</span></a>
+    {% else %}
+      <p class="empty-note">No saved resumes yet. Start with one of the free templates.</p>
+      <a class="text-link" href="{{ url_for('main.templates') }}">Browse templates →</a>
+    {% endfor %}
+  </div>
+  <div class="panel recent-card">
+    <div class="panel-heading"><h2>Recent reports</h2><a href="{{ url_for('main.history') }}">See all</a></div>
+    {% for report in recent_reports %}
+      <a class="recent-row" href="{{ url_for('main.report_detail', report_id=report.report_id) }}"><span class="recent-score">{{ report.ats_score }}</span><span><b>{{ report.job_description.job_title or report.resume.file_name }}</b><small>{{ report.created_at.strftime('%b %d, %Y') }}</small></span><span aria-hidden="true">↗</span></a>
+    {% else %}
+      <p class="empty-note">Your saved scan reports will appear here.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

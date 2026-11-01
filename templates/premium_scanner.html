@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Premium scanner{% endblock %}
+{% block content %}
+<section class="container feature-page premium-page">
+  <div class="results-topline">
+    <div>
+      <p class="eyebrow">Premium features</p>
+      <h1>Focused resume scanner</h1>
+      <p class="muted">Use the scanner for high-intent job matches, with a server-side session timer and clear plan boundaries.</p>
+    </div>
+    <span class="premium-badge">PREMIUM</span>
+  </div>
+
+  <div class="pricing-grid pricing-grid-inline">
+    {% for plan in pricing_plans %}
+      <article class="panel pricing-card {% if plan.highlight %}pricing-card-featured{% endif %}">
+        {% if plan.highlight %}<span class="pricing-badge">Best value</span>{% endif %}
+        <p class="eyebrow plan-tier">{{ plan.name }}</p>
+        <h2>{{ plan.price_label }}<small>{{ plan.period }}</small></h2>
+        <p class="plan-description">{{ plan.description }}</p>
+        <ul>
+          {% for feature in plan.features %}
+            <li>{{ feature }}</li>
+          {% endfor %}
+        </ul>
+        {% if current_user.is_authenticated %}
+          <form method="get" action="{{ url_for('main.checkout_plan', plan_id=plan.id) }}">
+            <button class="button {% if plan.highlight %}button-primary{% else %}button-outline{% endif %} button-full" type="submit">{{ plan.cta }}</button>
+          </form>
+        {% else %}
+          <a class="button {% if plan.highlight %}button-primary{% else %}button-outline{% endif %} button-full" href="{{ url_for('auth.register') }}">{{ plan.cta }}</a>
+        {% endif %}
+      </article>
+    {% endfor %}
+  </div>
+
+  {% if scanner_seconds > 0 %}
+    <section class="panel scanner-session" data-countdown="{{ scanner_seconds }}">
+      <div>
+        <p class="eyebrow">Session active</p>
+        <h2>Time left</h2>
+        <p>When the countdown reaches zero, new scans are disabled. Any analysis already submitted can complete normally.</p>
+      </div>
+      <div class="scanner-clock" id="scanner-clock" role="timer" aria-live="off">{{ '%02d:%02d'|format(scanner_seconds // 60, scanner_seconds % 60) }}</div>
+    </section>
+
+    <form class="analysis-form panel scanner-form" method="post" action="{{ url_for('main.analyze_premium_session') }}" enctype="multipart/form-data" id="premium-scan-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-section-title"><span>01</span><div><h2>Upload your resume</h2><p>PDF or DOCX · 5 MB maximum</p></div></div>
+      <label class="upload-box" for="resume-file"><span class="upload-symbol" aria-hidden="true">↑</span><strong id="file-name">Choose a resume file</strong><span>or drop a file here</span><input id="resume-file" name="resume" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" required></label>
+      <div class="two-fields"><div><label for="job-title">Job title <span class="optional">(optional)</span></label><input id="job-title" name="job_title" type="text" maxlength="150"></div><div><label for="company-name">Company <span class="optional">(optional)</span></label><input id="company-name" name="company_name" type="text" maxlength="150"></div></div>
+      <label for="job-description">Job description</label><textarea id="job-description" name="job_description" rows="8" maxlength="20000" minlength="30" required></textarea>
+      <div class="text-meta"><span>At least 30 characters</span><span id="char-count">0 / 20,000</span></div>
+      <button id="analyze-button" class="button button-primary button-full" type="submit"><span class="button-label">Start premium scan</span><span class="loading-label" hidden>Analyzing…</span></button>
+    </form>
+  {% else %}
+    <section class="panel scanner-expired" role="status">
+      <p class="eyebrow">Session ended</p>
+      <h2>Your two-minute scanner session has expired.</h2>
+      <p>No scan was cancelled. Any analysis started before the countdown ended continues to its results. Start a new session when you are ready; your active Premium plan allows another two-minute session.</p>
+      <form method="post" action="{{ url_for('main.start_premium_scanner') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="button button-primary" type="submit">Start a new 2-minute session</button></form>
+    </section>
+  {% endif %}
+</section>
+{% endblock %}
+{% block scripts %}
+{% if scanner_seconds > 0 %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const session = document.querySelector("[data-countdown]");
+  if (!session) return;
+  let seconds = Number(session.dataset.countdown);
+  const clock = document.querySelector("#scanner-clock");
+  const form = document.querySelector("#premium-scan-form");
+  const tick = () => {
+    seconds = Math.max(0, seconds - 1);
+    if (clock) clock.textContent = `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
+    if (seconds === 0) {
+      if (form) {
+        form.querySelectorAll("input, textarea, button").forEach((control) => { control.disabled = true; });
+        const notice = document.createElement("p");
+        notice.className = "flash flash-info";
+        notice.setAttribute("role", "status");
+        notice.textContent = "Session expired. Open the scanner again when you are ready to start a new session.";
+        form.prepend(notice);
+      }
+      return;
+    }
+    window.setTimeout(tick, 1000);
+  };
+  window.setTimeout(tick, 1000);
+});
+</script>
+{% endif %}
+{% endblock %}

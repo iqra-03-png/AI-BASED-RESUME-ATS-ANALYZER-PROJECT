@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}AI Resume Analyzer{% endblock %}
+{% block content %}
+<section class="container feature-page">
+  <div class="results-topline">
+    <div>
+      <p class="eyebrow">AI analysis</p>
+      <h1>AI Resume Analyzer</h1>
+      <p class="muted">Review the role fit, identify gaps, and get a prompt-ready summary that complements the rule-based ATS score.</p>
+    </div>
+    <div class="builder-actions">
+      <a class="button button-outline" href="{{ url_for('main.ai_assistant') }}">Open AI Assistant</a>
+    </div>
+  </div>
+
+  <div class="ai-layout">
+    <form class="panel ai-panel" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-section-title"><span>01</span><div><h2>Review a role</h2><p>Use the latest resume and job context as the base for analysis.</p></div></div>
+      <label for="analyzer-prompt">What should the analyzer focus on?</label>
+      <textarea id="analyzer-prompt" name="prompt" rows="7" placeholder="Example: Flag the biggest gaps versus a senior backend engineer role and suggest 3 resume updates.">{{ prompt or '' }}</textarea>
+      <button class="button button-primary button-full" type="submit">Run AI review</button>
+    </form>
+
+    <aside class="panel ai-panel">
+      <p class="eyebrow">Context</p>
+      <h2>Current resume snapshot</h2>
+      {% if latest_report %}
+      <div class="stat-card compact-card">
+        <span>ATS estimate</span>
+        <strong>{{ latest_report.ats_score }}<small>/100</small></strong>
+        <small>{{ latest_report.job_description.job_title or latest_report.resume.file_name }}</small>
+      </div>
+      {% else %}
+      <div class="empty-note">No saved reports are available yet. Complete a resume scan to unlock the analyzer context.</div>
+      {% endif %}
+      <p class="small-note">{{ 'Live-provider mode is ready when configured.' if provider_ready else 'This project is currently operating without a live AI provider. The analyzer feedback is intentionally local and explanatory.' }}</p>
+    </aside>
+  </div>
+
+  {% if result %}
+  <section class="panel ai-result">
+    <p class="eyebrow">Analyzer summary</p>
+    <h2>{{ result.status == 'provider_ready' and 'Provider-ready review' or 'Local review guidance' }}</h2>
+    <p>{{ result.summary }}</p>
+    <ul>
+      {% for item in result.suggestions %}
+      <li>{{ item }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+</section>
+{% endblock %}

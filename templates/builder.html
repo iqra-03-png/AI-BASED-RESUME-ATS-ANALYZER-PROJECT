@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Resume builder{% endblock %}
+{% block content %}
+<section class="container feature-page">
+  <div class="results-topline"><div><p class="eyebrow">{{ template.name }} · Version {{ draft.version }}</p><h1>Edit your resume</h1><p class="muted">Keep details truthful and specific. Save creates a version snapshot.</p></div>
+    <div class="builder-actions"><a class="button button-outline" href="{{ url_for('main.resume_versions', draft_id=draft.draft_id) }}">Version history</a><a class="button button-outline" href="{{ url_for('main.export_resume', draft_id=draft.draft_id, file_format='docx') }}">Download DOCX ↓</a><a class="button button-primary" href="{{ url_for('main.export_resume', draft_id=draft.draft_id, file_format='pdf') }}">Download PDF ↓</a></div>
+  </div>
+  <div class="builder-grid">
+    <form class="panel builder-form" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label for="title">Resume name</label><input id="title" name="title" type="text" maxlength="120" value="{{ draft.title }}" required>
+      {% for field, (label, limit) in fields.items() %}
+        <label for="{{ field }}">{{ label }}</label>
+        {% if field in ['summary', 'skills', 'experience', 'education', 'projects', 'certifications', 'achievements'] %}
+        <textarea id="{{ field }}" name="{{ field }}" rows="{{ 6 if field in ['experience', 'projects', 'education'] else 3 }}" maxlength="{{ limit }}" data-preview-field="{{ field }}">{{ resume_data.get(field, '') }}</textarea>
+        {% else %}
+        <input id="{{ field }}" name="{{ field }}" type="text" maxlength="{{ limit }}" value="{{ resume_data.get(field, '') }}" data-preview-field="{{ field }}">
+        {% endif %}
+      {% endfor %}
+      <button class="button button-primary button-full" type="submit">Save resume</button>
+    </form>
+    <aside class="panel resume-preview">
+      <div class="preview-header"><span>LIVE PREVIEW</span><b>{{ template.name }}</b></div>
+      <div class="resume-preview-paper accent-{{ template.accent }}">
+        <h2 data-live-preview="full_name">{{ resume_data.get('full_name') or 'Your name' }}</h2>
+        <p class="resume-preview-headline" data-live-preview="headline">{{ resume_data.get('headline') or 'Professional headline' }}</p>
+        <p class="resume-preview-contact"><span data-live-preview="email">{{ resume_data.get('email') }}</span><span data-live-preview="phone">{{ resume_data.get('phone') }}</span><span data-live-preview="location">{{ resume_data.get('location') }}</span></p>
+        {% for field, (label, limit) in fields.items() if field not in ['full_name', 'email', 'phone', 'location', 'headline'] %}
+        <section class="preview-section" data-preview-section="{{ field }}" {% if not resume_data.get(field) %}hidden{% endif %}><h3>{{ label }}</h3><p data-live-preview="{{ field }}">{{ resume_data.get(field, '') }}</p></section>
+        {% endfor %}
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("[data-preview-field]").forEach((field) => {
+    field.addEventListener("input", () => {
+      const target = document.querySelector(`[data-live-preview="${field.name}"]`);
+      if (target) target.textContent = field.value || (field.name === "full_name" ? "Your name" : "");
+      const section = document.querySelector(`[data-preview-section="${field.name}"]`);
+      if (section) section.hidden = !field.value.trim();
+    });
+  });
+});
+</script>
+{% endblock %}

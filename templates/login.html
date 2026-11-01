@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Log in{% endblock %}
+{% block head %}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/login.css') }}" rel="stylesheet">
+{% endblock %}
+{% block content %}
+<section class="login-screen" data-login-role="{{ role }}">
+  <aside class="login-brand-panel">
+    <div class="login-decoration login-decoration-one"></div>
+    <div class="login-decoration login-decoration-two"></div>
+    <div class="login-brand-content">
+      <a class="login-brand" href="{{ url_for('main.home') }}" aria-label="ResuNova home">
+        <span class="login-brand-mark" aria-hidden="true">R</span>
+        <span>ResuNova</span>
+      </a>
+      <h2 class="login-headline">Get your resume <span>past the ATS</span></h2>
+      <p class="login-intro">Make every application count with a resume that is ready to be noticed.</p>
+      <img class="login-illustration" src="{{ url_for('static', filename='assets/resume-scan.svg') }}" alt="A resume being scanned with a 92 ATS score, a green check, and Java and React skill matches">
+      <ul class="login-features">
+        <li><span aria-hidden="true">✓</span>Instant ATS score and keyword match</li>
+        <li><span aria-hidden="true">✓</span>Smart suggestions to improve your resume</li>
+      </ul>
+      <div class="login-template-row" aria-label="Available resume templates">
+        <div><span class="template-swatch classic-swatch" aria-hidden="true"></span><span>Classic</span><small>Free</small></div>
+        <div><span class="template-swatch modern-swatch" aria-hidden="true"></span><span>Modern</span><small>Free</small></div>
+        <div><span class="template-swatch executive-swatch" aria-hidden="true"></span><span>Executive</span><small><span aria-hidden="true">🔒</span> Premium</small></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="login-form-panel">
+    <div class="login-form-card">
+      <div class="login-role-toggle" role="group" aria-label="Choose account type">
+        <button type="button" class="login-role-option{% if role == 'user' %} is-active{% endif %}" data-role-choice="user" aria-pressed="{{ 'true' if role == 'user' else 'false' }}">User</button>
+        <button type="button" class="login-role-option{% if role == 'admin' %} is-active{% endif %}" data-role-choice="admin" aria-pressed="{{ 'true' if role == 'admin' else 'false' }}">Admin</button>
+      </div>
+
+      <p class="login-eyebrow" data-login-eyebrow>{% if role == 'admin' %}Admin access{% else %}Your workspace{% endif %}</p>
+      <h1 data-login-title>{% if role == 'admin' %}Admin panel{% else %}Welcome back{% endif %}</h1>
+      <p class="login-subtitle" data-login-subtitle>{% if role == 'admin' %}Authorized admins only{% else %}Log in to your user account{% endif %}</p>
+
+      <form class="login-form" method="post" action="{{ url_for('auth.login') }}" novalidate data-login-form>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="role" value="{{ role }}" data-login-role-input>
+
+        <div class="login-field">
+          <label for="email">Email address</label>
+          <input id="email" name="email" type="email" autocomplete="username" inputmode="email" maxlength="254" value="{{ email }}" required aria-describedby="email-error" {% if errors.get('email') %}aria-invalid="true"{% endif %}>
+          <p class="login-field-error" id="email-error" role="alert">{% if errors.get('email') %}{{ errors.email }}{% endif %}</p>
+        </div>
+
+        <div class="login-field">
+          <label for="password">Password</label>
+          <div class="password-field login-password-field">
+            <input id="password" name="password" type="password" autocomplete="current-password" maxlength="128" required aria-describedby="password-error" {% if errors.get('password') %}aria-invalid="true"{% endif %}>
+            <button class="password-toggle" type="button" aria-label="Show password" aria-pressed="false">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Zm10-2.5A2.5 2.5 0 1 1 12 14.5a2.5 2.5 0 0 1 0-5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+            </button>
+          </div>
+          <p class="login-field-error" id="password-error" role="alert">{% if errors.get('password') %}{{ errors.password }}{% endif %}</p>
+        </div>
+
+        <div class="login-options">
+          <label class="remember-option"><input type="checkbox" name="remember" value="1"> <span>Remember me</span></label>
+          <a class="login-text-link" href="{{ url_for('auth.forgot_password') }}" data-forgot-link>Forgot password?</a>
+        </div>
+
+        <button class="login-primary-button" type="submit" data-login-submit>
+          <span data-submit-label>{% if role == 'admin' %}Log in as admin{% else %}Log in as user{% endif %}</span>
+          <span data-loading-label hidden>Logging in…</span>
+        </button>
+      </form>
+
+      <p class="login-register" data-admin-register-link {% if role != 'admin' %}hidden{% endif %}>New Admin? <a href="{{ url_for('auth.admin_register') }}">Create New Account</a></p>
+      <div class="login-divider"><span>or</span></div>
+      <button class="login-google-button" type="button" data-google-sign-in>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.35 12.23c0-.72-.06-1.42-.18-2.1H12v3.97h5.24a4.49 4.49 0 0 1-1.94 2.94v2.45h3.14c1.84-1.7 2.91-4.2 2.91-7.26Z"/><path fill="#34A853" d="M12 21.6c2.64 0 4.85-.88 6.46-2.38l-3.14-2.45c-.87.58-1.98.93-3.32.93-2.55 0-4.71-1.72-5.48-4.04H3.27v2.53A9.75 9.75 0 0 0 12 21.6Z"/><path fill="#FBBC05" d="M6.52 13.66a5.86 5.86 0 0 1 0-3.72V7.41H3.27a9.75 9.75 0 0 0 0 8.78l3.25-2.53Z"/><path fill="#EA4335" d="M12 5.9c1.44 0 2.73.5 3.75 1.5l2.81-2.8A9.38 9.38 0 0 0 12 2.4a9.75 9.75 0 0 0-8.73 5.01l3.25 2.53C7.29 7.62 9.45 5.9 12 5.9Z"/></svg>
+        Continue with Google
+      </button>
+      <p class="google-sign-in-message" data-google-message aria-live="polite"></p>
+
+      {% if role != 'admin' %}
+      <p class="login-register" data-register-link>New to ResuNova? <a href="{{ url_for('auth.register') }}">Create New Account</a></p>
+      {% else %}
+      <p class="login-register" data-register-link hidden>New to ResuNova? <a href="{{ url_for('auth.register') }}">Create New Account</a></p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/login.js') }}" defer></script>
+{% endblock %}

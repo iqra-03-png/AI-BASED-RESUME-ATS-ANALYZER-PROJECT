@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Checkout{% endblock %}
+{% block content %}
+<section class="container page-heading">
+  <p class="eyebrow">Subscription checkout</p>
+  <h1>Complete your {{ plan.name }} purchase</h1>
+</section>
+<section class="container checkout-grid">
+  <form method="post" action="{{ url_for('main.checkout_plan_submit', plan_id=plan.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="checkout-card payment-summary">
+      <div>
+        <p class="eyebrow">Step 1 • Plan</p>
+        <h2>{{ plan.name }}</h2>
+        <div class="plan-badges">
+          <span class="plan-badge">₹{{ '{:,.0f}'.format(plan.price) }}</span>
+          <span class="plan-badge">{{ plan.period }}</span>
+        </div>
+        <p class="muted">{{ plan.description }}</p>
+      </div>
+      <ul class="summary-list">
+        <li><span>Plan</span><strong>{{ plan.name }}</strong></li>
+        <li><span>Billing</span><strong>{{ plan.price_label }}</strong></li>
+        <li><span>Includes</span><strong>{{ plan.features | length }} features</strong></li>
+      </ul>
+      <div>
+        <p class="eyebrow">Step 2 • Customer details</p>
+        <label for="full_name">Full name</label>
+        <input id="full_name" name="full_name" type="text" value="{{ current_user.name }}" maxlength="100" required>
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" value="{{ current_user.email }}" maxlength="254" required>
+      </div>
+      {% if not payment_ready %}
+      <div class="payment-setup">
+        <strong>Safe setup required.</strong>
+        <p>Razorpay is not configured in this deployment yet. Add <code>RAZORPAY_KEY_ID</code> and <code>RAZORPAY_KEY_SECRET</code> to your environment, then restart the app to enable the provider-hosted checkout page. Use Razorpay test keys in development.</p>
+      </div>
+      {% endif %}
+      <div class="checkout-actions">
+        <a class="button button-outline" href="{{ url_for('main.pricing') }}">Back</a>
+        <button class="button button-primary" type="submit" {% if not payment_ready %}disabled{% endif %}>Continue to Payment</button>
+      </div>
+    </div>
+  </form>
+  <aside class="payment-box">
+    <p class="eyebrow">Plan summary</p>
+    <h2>{{ plan.name }}</h2>
+    <p class="muted">{{ plan.description }}</p>
+    <ul class="summary-list">
+      <li><span>Amount</span><strong>₹{{ '{:,.0f}'.format(plan.price) }}</strong></li>
+      <li><span>Billing period</span><strong>{{ plan.period }}</strong></li>
+      <li><span>Total payable</span><strong>₹{{ '{:,.0f}'.format(plan.price) }}</strong></li>
+    </ul>
+    <div class="payment-methods" aria-label="Supported payment methods">
+      <span>UPI</span>
+      <span>Cards</span>
+      <span>Net banking</span>
+      <span>Wallets</span>
+    </div>
+    {% if not payment_ready %}
+    <p class="payment-status">Provider checkout is disabled until the environment is configured for Razorpay.</p>
+    {% else %}
+    <p class="payment-status">Hosted payment page and signature verification are enabled for this deployment.</p>
+    {% endif %}
+    <ul>
+      {% for feature in plan.features %}
+      <li>{{ feature }}</li>
+      {% endfor %}
+    </ul>
+  </aside>
+</section>
+{% endblock %}

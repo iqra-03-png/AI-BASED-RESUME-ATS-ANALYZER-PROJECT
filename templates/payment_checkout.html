@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Pay securely{% endblock %}
+{% block content %}
+<section class="container page-heading">
+  <p class="eyebrow">Secure checkout</p>
+  <h1>Pay for {{ plan.name }}</h1>
+</section>
+<section class="container checkout-grid">
+  <div class="payment-box">
+    <p class="eyebrow">Step 3 • Payment</p>
+    <h2>Hosted payment powered by {{ provider_name }}</h2>
+    <p class="muted">Your card details, UPI PIN, CVV, and bank credentials stay with the payment provider. This app never stores raw payment data.</p>
+    {% if payment_ready %}
+    <div class="payment-methods" aria-label="Payment methods supported by Razorpay">
+      <span>UPI</span>
+      <span>Cards</span>
+      <span>Net banking</span>
+      <span>Wallets</span>
+    </div>
+    <div class="checkout-actions">
+      <a class="button button-outline" href="{{ url_for('main.checkout_plan', plan_id=plan.id) }}">Back</a>
+      <button id="rzp-button" class="button button-primary" type="button" disabled>Pay ₹{{ '{:,.0f}'.format(plan.price) }}</button>
+    </div>
+    {% else %}
+    <div class="payment-setup">
+      <strong>Payment setup required.</strong>
+      <p>Live checkout is disabled because the Razorpay payment credentials are not configured. Add <code>RAZORPAY_KEY_ID</code> and <code>RAZORPAY_KEY_SECRET</code>, then use the provider's test keys to complete a secure test payment.</p>
+    </div>
+    <div class="checkout-actions">
+      <a class="button button-outline" href="{{ url_for('main.checkout_plan', plan_id=plan.id) }}">Back</a>
+      <a class="button button-primary" href="{{ url_for('main.pricing') }}">Return to plans</a>
+    </div>
+    {% endif %}
+  </div>
+  <aside class="checkout-card payment-summary">
+    <p class="eyebrow">Order summary</p>
+    <h2>{{ plan.name }}</h2>
+    <div class="plan-badges">
+      <span class="plan-badge">₹{{ '{:,.0f}'.format(plan.price) }}</span>
+      <span class="plan-badge">{{ plan.period }}</span>
+    </div>
+    <ul class="summary-list">
+      <li><span>Customer</span><strong>{{ checkout_data.customer_name }}</strong></li>
+      <li><span>Email</span><strong>{{ checkout_data.customer_email }}</strong></li>
+      <li><span>Amount</span><strong>₹{{ '{:,.0f}'.format(plan.price) }}</strong></li>
+      <li><span>Total payable</span><strong>₹{{ '{:,.0f}'.format(plan.price) }}</strong></li>
+    </ul>
+    <p class="payment-status">No payment is activated until the backend verifies the Razorpay signature.</p>
+  </aside>
+</section>
+{% if payment_ready %}
+<form id="verify-form" method="post" action="{{ url_for('main.verify_payment') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="payment_id" id="payment_id">
+  <input type="hidden" name="order_id" id="order_id">
+  <input type="hidden" name="signature" id="signature">
+  <input type="hidden" name="plan_id" value="{{ plan.id }}">
+</form>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const button = document.getElementById('rzp-button');
+    const orderData = {{ checkout_data | tojson }};
+    const keyId = {{ key_id | tojson }};
+    if (!button || !orderData || !keyId || !orderData.order_id) {
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    script.onload = function () {
+      button.disabled = false;
+      button.addEventListener('click', function () {
+        const razorpay = new Razorpay({
+          key: keyId,
+          amount: orderData.amount,
+          currency: orderData.currency,
+          name: 'ResumeLens',
+          description: orderData.plan_name,
+          order_id: orderData.order_id,
+          handler: function (response) {
+            document.getElementById('payment_id').value = response.razorpay_payment_id;
+            document.getElementById('order_id').value = response.razorpay_order_id;
+            document.getElementById('signature').value = response.razorpay_signature;
+            document.getElementById('verify-form').submit();
+          },
+          prefill: {
+            name: orderData.customer_name,
+            email: orderData.customer_email,
+          },
+          notes: {
+            plan_id: orderData.plan_id,
+          },
+          theme: {
+            color: '#176b87',
+          },
+          modal: {
+            ondismiss: function () {
+              const status = document.querySelector('.payment-status');
+              if (status) {
+                status.textContent = 'Payment was cancelled before completion. No subscription was activated.';
+              }
+            }
+          }
+        });
+        razorpay.open();
+      });
+    };
+    document.head.appendChild(script);
+  });
+</script>
+{% endif %}
+{% endblock %}

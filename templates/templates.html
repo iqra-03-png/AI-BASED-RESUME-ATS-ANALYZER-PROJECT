@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Resume templates{% endblock %}
+{% block head %}
+  <link href="{{ url_for('static', filename='css/templates.css') }}" rel="stylesheet">
+{% endblock %}
+{% block content %}
+<section class="container feature-page">
+  <div class="results-topline"><div><p class="eyebrow">Resume builder</p><h1>Templates for your next opportunity</h1><p class="muted">Every layout supports editable sections and PDF/DOCX export. Premium designs remain locked until your plan is active.</p></div></div>
+  <section class="recommendation-callout panel">
+    <div><p class="eyebrow">Recommended for {{ profile.category }}</p><h2>Start with a layout that fits your story</h2><p>Suggestions: {{ guidance.templates|join(', ') }}</p></div>
+    <a class="button button-outline" href="{{ url_for('main.profile_settings') }}">Change profile category</a>
+  </section>
+
+  <div class="template-filters" aria-label="Template categories">
+    <span class="filter-pill active">All templates</span>
+    <span class="filter-pill">Free</span>
+    <span class="filter-pill">Premium</span>
+    <span class="filter-pill">Professional</span>
+  </div>
+
+  <div class="template-grid">
+    {% for template in templates %}
+    <article class="template-card panel">
+      <div class="template-preview accent-{{ template.accent }}" aria-label="Preview of {{ template.name }} resume template">
+        <div class="preview-paper preview-{{ template.id }}">
+          <div class="preview-resume">
+            <div class="preview-top">
+              <div class="preview-name">Alicia Morgan</div>
+              <div class="preview-title">Product Designer</div>
+              <div class="preview-contact">alicia@portfolio.dev · +91 98765 43210 · Mumbai</div>
+            </div>
+            <div class="preview-summary">Product designer with 6+ years building human-centered digital experiences and measurable product outcomes.</div>
+            <div class="preview-section">
+              <div class="preview-section-title">Skills</div>
+              <div class="preview-tag-list"><span>Figma</span><span>UX</span><span>Research</span></div>
+            </div>
+            <div class="preview-section">
+              <div class="preview-section-title">Experience</div>
+              <ul class="preview-bullets">
+                <li>Led redesign of onboarding flow; +32% activation.</li>
+                <li>Partnered with PM and engineering to ship 3 product launches.</li>
+              </ul>
+            </div>
+            <div class="preview-section">
+              <div class="preview-section-title">Education</div>
+              <div class="preview-line"></div>
+              <div class="preview-line short"></div>
+            </div>
+          </div>
+        </div>
+        {% if template.tier == 'premium' and not premium_active %}
+        <span class="template-lock" aria-label="Premium template locked">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="15" r="1" fill="currentColor"/></svg>
+        </span>
+        {% endif %}
+      </div>
+      <div class="template-card-body">
+        <div class="template-title"><div><span class="template-tier {{ template.tier }}">{{ 'Premium' if template.tier == 'premium' else 'Free' }}</span><h2>{{ template.name }}</h2></div><span class="template-industry">{{ template.industry }}</span></div>
+        <p>{{ template.description }}</p>
+        <div class="tag-list">{% for feature in template.features %}<span class="keyword-tag">{{ feature }}</span>{% endfor %}</div>
+        {% if template.tier == 'free' or premium_active %}
+        <a class="button button-primary button-full" href="{{ url_for('main.select_template', template_id=template.id) }}">Use Template</a>
+        {% else %}
+        <button class="button button-outline button-full template-locked-button" type="button" data-premium-template>🔒 Premium template</button>
+        {% endif %}
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% if not premium_active %}
+  <dialog class="premium-template-dialog" id="premium-template-dialog" aria-labelledby="premium-dialog-title">
+    <h2 id="premium-dialog-title">Premium template</h2>
+    <p>Upgrade to Premium to use this template.</p>
+    <div class="premium-dialog-actions">
+      <button class="button button-outline" type="button" data-dialog-close>Maybe later</button>
+      <a class="button button-primary" href="{{ url_for('main.pricing') }}">View plans</a>
+    </div>
+  </dialog>
+  {% endif %}
+</section>
+{% endblock %}

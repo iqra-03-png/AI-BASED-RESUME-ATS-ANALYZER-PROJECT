@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}AI Resume Assistant{% endblock %}
+{% block content %}
+<section class="container feature-page">
+  <div class="results-topline">
+    <div>
+      <p class="eyebrow">AI workspace</p>
+      <h1>AI Resume Assistant</h1>
+      <p class="muted">Draft sharper bullet points, tighten your summary, and tailor each resume toward the role you are targeting.</p>
+    </div>
+    <div class="builder-actions">
+      <a class="button button-outline" href="{{ url_for('main.ai_analyzer') }}">Open AI Analyzer</a>
+    </div>
+  </div>
+
+  <div class="ai-layout">
+    <form class="panel ai-panel" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-section-title"><span>01</span><div><h2>Ask for help</h2><p>Use your latest resume context as a starting point.</p></div></div>
+      <label for="assistant-prompt">What would you like to improve?</label>
+      <textarea id="assistant-prompt" name="prompt" rows="7" placeholder="Example: Rewrite my summary for a product manager role and strengthen my bullet points using measurable impact.">{{ prompt or '' }}</textarea>
+      <button class="button button-primary button-full" type="submit">Draft suggestions</button>
+    </form>
+
+    <aside class="panel ai-panel">
+      <p class="eyebrow">Status</p>
+      <h2>{{ 'AI provider configured' if provider_ready else 'Local-only mode' }}</h2>
+      <p class="small-note">{% if provider_ready %}The application has provider environment variables available for a live integration. This page is ready to connect to a real model when configured.{% else %}No live AI provider is configured yet. The app is safe to use in local-only mode and keeps resume context on the server for later provider integration.{% endif %}</p>
+      {% if latest_report %}
+      <div class="stat-card compact-card">
+        <span>Latest report</span>
+        <strong>{{ latest_report.ats_score }}<small>/100</small></strong>
+        <small>{{ latest_report.job_description.job_title or 'Recent role analysis' }}</small>
+      </div>
+      {% else %}
+      <div class="empty-note">No saved analysis yet. Run a resume analysis to make the assistant context more useful.</div>
+      {% endif %}
+    </aside>
+  </div>
+
+  {% if result %}
+  <section class="panel ai-result">
+    <p class="eyebrow">Assistant response</p>
+    <h2>{{ result.status == 'provider_ready' and 'Provider-ready assistant output' or 'Safe local fallback guidance' }}</h2>
+    <p>{{ result.summary }}</p>
+    <ul>
+      {% for item in result.suggestions %}
+      <li>{{ item }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+</section>
+{% endblock %}

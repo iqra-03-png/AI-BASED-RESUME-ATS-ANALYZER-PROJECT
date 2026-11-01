@@ -1,0 +1,43 @@
+.template-lock {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 50%;
+  color: #6245a0;
+  background: #fff;
+  box-shadow: 0 2px 8px #183b5622;
+}
+
+.template-lock svg { width: 17px; height: 17px; }
+.template-locked-button { color: #6245a0; border-color: #ded6f7; background: #f8f5ff; }
+.template-locked-button:hover { color: #50368d; background: #f0ebff; }
+
+.premium-template-dialog {
+  width: min(420px, calc(100% - 32px));
+  padding: 28px;
+  border: 1px solid #e5e2ef;
+  border-radius: 16px;
+  color: #172f42;
+  box-shadow: 0 24px 70px rgba(17, 24, 39, .24);
+}
+
+.premium-template-dialog::backdrop { background: rgba(17, 24, 39, .55); }
+.premium-template-dialog h2 { margin: 0 0 9px; font-size: 22px; }
+.premium-template-dialog p { margin: 0; color: #647789; }
+.premium-dialog-actions { display: flex; gap: 10px; margin-top: 22px; }
+.premium-dialog-actions .button { flex: 1; margin: 0; }
+.admin-template-list { margin-top: 20px; }
+.admin-template-list h2 { margin: 0 0 15px; font-size: 20px; }
+.admin-template-items { display: grid; }
+.admin-template-item { display: flex; gap: 16px; align-items: center; justify-content: space-between; padding: 12px 0; border-top: 1px solid #e1e9ed; }
+.admin-template-item > div { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.admin-template-item .button { min-height: 38px; padding: 7px 12px; }
+
+@media (max-width: 520px) {
+  .premium-dialog-actions { flex-direction: column; }
+  .admin-template-item { align-items: flex-start; flex-direction: column; }
+}

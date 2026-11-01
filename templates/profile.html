@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Profile and settings{% endblock %}
+{% block content %}
+<section class="container feature-page narrow-page">
+  <div class="section-heading"><p class="eyebrow">Account settings</p><h1>Your profile</h1><p>Change your profile category whenever your goals change. Recommendations update across your workspace.</p></div>
+  <form class="panel profile-form" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label for="name">Name</label><input id="name" name="name" type="text" maxlength="100" value="{{ current_user.name }}" required>
+    <label for="email">Email address</label><input id="email" type="email" value="{{ current_user.email }}" readonly aria-describedby="email-note">
+    <p class="field-help" id="email-note">Email address is your account sign-in and cannot be changed here.</p>
+    <label for="category">Profile category</label>
+    <select id="category" name="category" required>{% for category in categories %}<option value="{{ category }}" {% if category == profile.category %}selected{% endif %}>{{ category }}</option>{% endfor %}</select>
+    <div class="account-plan"><b>{{ 'Premium plan' if premium_active else 'Premium (expired)' if profile.plan == 'premium' else 'Free plan' }}</b><a href="{{ url_for('main.pricing') }}">Manage plan →</a></div>
+    <button class="button button-primary button-full" type="submit">Save profile</button>
+  </form>
+</section>
+{% endblock %}

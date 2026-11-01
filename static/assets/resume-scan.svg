@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="360" viewBox="0 0 560 360" fill="none">
+  <rect x="76" y="23" width="280" height="319" rx="18" fill="#202A3A" stroke="#3B4659" stroke-width="2"/>
+  <path d="M108 66h137" stroke="#8F84FF" stroke-width="8" stroke-linecap="round"/>
+  <path d="M108 87h103" stroke="#68758B" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="132" cy="133" r="20" fill="#343F52"/>
+  <path d="M168 125h148M168 139h112" stroke="#8792A5" stroke-width="6" stroke-linecap="round"/>
+  <rect x="108" y="173" width="216" height="68" rx="9" fill="#293448"/>
+  <path d="M124 190h87M124 203h162M124 217h132" stroke="#768398" stroke-width="5" stroke-linecap="round"/>
+  <rect x="108" y="255" width="82" height="26" rx="13" fill="#353E5B"/>
+  <text x="149" y="272" fill="#D9D5FF" font-family="Arial,sans-serif" font-size="12" font-weight="700" text-anchor="middle">Java</text>
+  <rect x="198" y="255" width="82" height="26" rx="13" fill="#353E5B"/>
+  <text x="239" y="272" fill="#D9D5FF" font-family="Arial,sans-serif" font-size="12" font-weight="700" text-anchor="middle">React</text>
+  <circle cx="345" cy="175" r="78" fill="#111827" stroke="#8F84FF" stroke-width="13"/>
+  <circle cx="345" cy="175" r="58" fill="#202A3A"/>
+  <path d="m402 232 58 58" stroke="#8F84FF" stroke-width="18" stroke-linecap="round"/>
+  <path d="m316 175 19 20 40-45" stroke="#63D69A" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="345" y="45" width="173" height="55" rx="15" fill="#F8FAFC"/>
+  <circle cx="374" cy="72" r="14" fill="#E5E0FF"/>
+  <path d="m367 72 5 5 9-11" stroke="#6D5DFC" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="398" y="69" fill="#111827" font-family="Arial,sans-serif" font-size="14" font-weight="700">92 ATS score</text>
+  <text x="398" y="85" fill="#687386" font-family="Arial,sans-serif" font-size="10">Strong keyword match</text>
+</svg>
